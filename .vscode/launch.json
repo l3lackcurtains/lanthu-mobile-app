@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "lanthu_bot",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "lanthu_bot (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    }
+  ]
+}
