@@ -16,8 +16,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lanthu Bot',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xFF44bd32),
+        brightness: Brightness.dark,
+        primaryColorLight: Colors.white,
+        primaryColorDark: Colors.black,
+        canvasColor: const Color(0xFF353b48),
+        backgroundColor: Colors.black,
+        scaffoldBackgroundColor: const Color(0xFF333333),
       ),
+      
       home: const HomePage(),
     );
   }

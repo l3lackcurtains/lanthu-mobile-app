@@ -11,12 +11,10 @@ class Trades extends StatefulWidget {
 }
 
 class _TradesState extends State<Trades> {
-
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -34,31 +32,33 @@ class _TradesState extends State<Trades> {
             if (snapshot.hasData) {
               final trades = snapshot.data as dynamic;
               return ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical,
                 itemCount: trades.length,
                 itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CardBox(
-                      trade: Trade.fromMap(trades[index]),
-                      onTapDelete: () {
-                        deleteUser(Trade.fromMap(trades[index]));
-                      },
-                      onTapEdit: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return const AddTrade();
-                            },
-                            settings: RouteSettings(
-                              arguments:
-                                  ScreenArguments(Trade.fromMap(trades[index])),
-                            ),
-                          ),
-                        ).then((value) => setState(() {}));
-                      },
+                  return Column(children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CardBox(
+                        trade: Trade.fromMap(trades[index]),
+                        onTapDelete: () {
+                          deleteUser(Trade.fromMap(trades[index]));
+                        },
+                        onTapEdit: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return AddTrade(
+                                  trade: Trade.fromMap(trades[index]));
+                            }),
+                          ).then((value) => setState(() {}));
+                        },
+                      ),
                     ),
-                  );
+                    index == trades.length - 1
+                        ? Container(height: 60)
+                        : Container()
+                  ]);
                 },
               );
             } else {
