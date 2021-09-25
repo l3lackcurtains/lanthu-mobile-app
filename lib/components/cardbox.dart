@@ -15,7 +15,7 @@ class CardBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 2.0,
-      color: Colors.white,
+      color: Theme.of(context).canvasColor,
       child: ListTile(
         contentPadding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
         leading: trade.token != null ? Image.network('https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${trade.token.toString().toLowerCase()}.png') : const Text(""),
