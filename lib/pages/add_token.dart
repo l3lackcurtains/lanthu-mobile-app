@@ -1,8 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lanthu_bot/database/database.dart';
 import 'package:lanthu_bot/models/token.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
+import 'package:lanthu_bot/utils/constants.dart';
 
 class ScreenArguments {
   final Token token;
@@ -109,31 +109,43 @@ class _AddTokenState extends State<AddToken> {
   }
 
   insertToken() async {
-    final token = Token(
-      id: mongo.ObjectId(),
-      name: nameController.text.toString(),
-      slug: slugController.text.toString(),
-      address: addressController.text.toString(),
-    );
-    await MongoDatabase.addToken(token);
-    Navigator.pop(context);
+    var dio = Dio();
+
+    try {
+      await dio.post("$apiUrl/tokens", data: {
+        "name": nameController.text.toString(),
+        "slug": slugController.text.toString(),
+        "address": addressController.text.toString(),
+      });
+      Navigator.pop(context);
+    } catch (e) {
+      throw Exception('Failed to add token');
+    }
   }
 
   updateToken() async {
-    final utoken = Token(
-      id: widget.token!.id,
-      name: nameController.text,
-      slug: slugController.text.toString(),
-      address: addressController.text.toString(),
-    );
-    await MongoDatabase.updateToken(utoken);
-    Navigator.pop(context);
+    var dio = Dio();
+    var id = widget.token!.id;
+    try {
+      await dio.put("$apiUrl/tokens/$id", data: {
+        "name": nameController.text,
+        "slug": slugController.text.toString(),
+        "address": addressController.text.toString(),
+      });
+      Navigator.pop(context);
+    } catch (e) {
+      throw Exception('Failed to update token.');
+    }
   }
 
   deleteToken() async {
-    if (widget.token != null) {
-      await MongoDatabase.deleteToken(widget.token as Token);
-      setState(() {});
+    var dio = Dio();
+    var tokenName = widget.token!.name;
+    try {
+      await dio.delete("$apiUrl/tokens/$tokenName");
+      Navigator.pop(context);
+    } catch (e) {
+      throw Exception('Failed to delete token');
     }
   }
 }

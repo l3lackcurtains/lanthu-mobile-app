@@ -1,7 +1,5 @@
-import 'package:mongo_dart/mongo_dart.dart';
-
 class Token {
-  final ObjectId? id;
+  final String? id;
   final String? address;
   final String? name;
   final String? slug;
@@ -13,7 +11,7 @@ class Token {
   }
 
   Token.fromMap(Map<String, dynamic> map)
-      : id = map['_id'],
+      : id = map['_id'].toString(),
         name = map['name'],
         address = map['address'],
         slug = map['slug'];

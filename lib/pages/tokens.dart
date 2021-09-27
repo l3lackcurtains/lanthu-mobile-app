@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lanthu_bot/components/token_box.dart';
-import 'package:lanthu_bot/database/database.dart';
+import 'package:lanthu_bot/models/token.dart';
 import 'package:lanthu_bot/pages/add_token.dart';
+import 'package:http/http.dart' as http;
+import 'package:lanthu_bot/utils/constants.dart';
 
 class Tokens extends StatefulWidget {
   const Tokens({Key? key}) : super(key: key);
@@ -10,15 +15,39 @@ class Tokens extends StatefulWidget {
 }
 
 class _TokensState extends State<Tokens> {
+  List<dynamic> tokens = [];
+  Future<List<dynamic>>? _futureTokens;
+
   @override
   void initState() {
     super.initState();
+    _futureTokens = fetchFutureTokens();
+  }
+
+  Future<List<dynamic>> fetchFutureTokens() async {
+    var client = http.Client();
+    try {
+      var url = Uri.parse('$apiUrl/tokens');
+
+      var response = await client.get(url);
+
+      if (response.statusCode == 200) {
+        final resData = json.decode(response.body);
+        final List<dynamic> message = resData["message"];
+
+        tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+      }
+    } on SocketException {
+      client.close();
+      throw 'No Internet connection';
+    }
+    return tokens;
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: MongoDatabase.getTokens(),
+        future: _futureTokens,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
@@ -29,7 +58,7 @@ class _TokensState extends State<Tokens> {
             );
           } else {
             if (snapshot.hasData) {
-              final tokens = snapshot.data as dynamic;
+              final tokens = snapshot.data as List<dynamic>;
               return ListView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
