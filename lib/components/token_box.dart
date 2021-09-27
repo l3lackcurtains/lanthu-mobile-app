@@ -32,7 +32,7 @@ class TokenBox extends StatelessWidget {
                         color: Colors.black, shape: BoxShape.circle),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           token.name.toString(),
@@ -51,6 +51,7 @@ class TokenBox extends StatelessWidget {
                     color: Colors.black, shape: BoxShape.circle),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       token.name.toString(),

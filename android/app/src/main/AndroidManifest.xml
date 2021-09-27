@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.lanthu_bot">
    <application
-        android:label="lanthu_bot"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Lanthu Bot"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
