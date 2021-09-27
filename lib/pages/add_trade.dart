@@ -177,7 +177,6 @@ class _AddTradeState extends State<AddTrade> {
     final trade = Trade(
         id: mongo.ObjectId(),
         token: _selectedToken.name,
-        address: _selectedToken.address,
         amount: double.parse(amountController.text),
         limit: double.parse(limitController.text),
         type: _types[_typeIndex],
@@ -193,7 +192,6 @@ class _AddTradeState extends State<AddTrade> {
       final utrade = Trade(
           id: widget.trade!.id,
           token: _selectedToken.name,
-          address: _selectedToken.address,
           amount: double.parse(amountController.text),
           limit: double.parse(limitController.text),
           type: _types[_typeIndex],
