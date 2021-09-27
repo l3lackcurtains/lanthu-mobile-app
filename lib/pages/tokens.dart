@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lanthu_bot/components/token_box.dart';
 import 'package:lanthu_bot/database/database.dart';
-import 'package:lanthu_bot/models/token.dart';
 import 'package:lanthu_bot/pages/add_token.dart';
 
 class Tokens extends StatefulWidget {
@@ -11,12 +10,10 @@ class Tokens extends StatefulWidget {
 }
 
 class _TokensState extends State<Tokens> {
-
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -32,28 +29,23 @@ class _TokensState extends State<Tokens> {
             );
           } else {
             if (snapshot.hasData) {
-              final tokens = snapshot.data as List<Token>;
+              final tokens = snapshot.data as dynamic;
               return ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical,
                 itemCount: tokens.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TokenBox(
                       token: tokens[index],
-                      onTapDelete: () {
-                        deleteUser(tokens[index]);
-                      },
                       onTapEdit: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return const AddToken();
+                              return AddToken(token: tokens[index]);
                             },
-                            settings: RouteSettings(
-                              arguments:
-                                  ScreenArguments(tokens[index]),
-                            ),
                           ),
                         ).then((value) => setState(() {}));
                       },
@@ -74,10 +66,5 @@ class _TokensState extends State<Tokens> {
             }
           }
         });
-  }
-
-  deleteUser(Token token) async {
-    await MongoDatabase.deleteToken(token);
-    setState(() {});
   }
 }

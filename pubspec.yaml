@@ -14,6 +14,8 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   mongo_dart: ^0.7.2
+  cached_network_image: ^3.1.0
+  morphable_shape: ^1.5.1
 
 dev_dependencies:
   flutter_test:
@@ -23,3 +25,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/success.png
+    - assets/error.png

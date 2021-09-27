@@ -10,14 +10,34 @@ class ScreenArguments {
 }
 
 class AddToken extends StatefulWidget {
-  const AddToken({Key? key}) : super(key: key);
+  const AddToken({Key? key, this.token}) : super(key: key);
   @override
   _AddTokenState createState() => _AddTokenState();
+
+  final Token? token;
 }
 
 class _AddTokenState extends State<AddToken> {
   TextEditingController nameController = TextEditingController();
   TextEditingController addressController = TextEditingController();
+  TextEditingController slugController = TextEditingController();
+
+  String _widgetText = "Add Token";
+
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
+
+  void initializeData() async {
+    if (widget.token != null) {
+      Token token = widget.token as Token;
+      nameController.text = token.name.toString();
+      addressController.text = token.address.toString();
+      _widgetText = 'Update Trade';
+    }
+  }
 
   @override
   void dispose() {
@@ -28,23 +48,19 @@ class _AddTokenState extends State<AddToken> {
 
   @override
   Widget build(BuildContext context) {
-
-    final args = ModalRoute.of(context)!.settings.arguments as ScreenArguments?;
-
-    Token? token;
-    if(args != null) {
-      token = args.token;
-    }
-
-    var widgetText = 'Add Token';
-    if (token != null) {
-      nameController.text = token.name.toString();
-      addressController.text = token.address.toString();
-      widgetText = 'Update Token';
-    }
     return Scaffold(
       appBar: AppBar(
-        title: Text(widgetText),
+        title: Text(_widgetText),
+        actions: <Widget>[
+          widget.token != null
+              ? IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    deleteToken();
+                  })
+              : Container(),
+        ],
       ),
       body: Stack(
         children: [
@@ -61,31 +77,31 @@ class _AddTokenState extends State<AddToken> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    keyboardType: TextInputType.number,
                     controller: addressController,
                     decoration: const InputDecoration(labelText: 'Address'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: slugController,
+                    decoration: const InputDecoration(labelText: 'Slug'),
                   ),
                 ),
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 4.0),
-              child: ElevatedButton(
-                child: Text(widgetText),
-                onPressed: () {
-                  if (token != null) {
-                    updateToken(token);
-                  } else {
-                    insertToken();
-                  }
-                },
-              ),
-            ),
-          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (widget.token != null) {
+            updateToken();
+          } else {
+            insertToken();
+          }
+        },
+        child: const Icon(Icons.check),
       ),
     );
   }
@@ -94,20 +110,28 @@ class _AddTokenState extends State<AddToken> {
     final token = Token(
       id: mongo.ObjectId(),
       name: nameController.text.toString(),
+      slug: slugController.text.toString(),
       address: addressController.text.toString(),
     );
     await MongoDatabase.addToken(token);
     Navigator.pop(context);
-    setState(() {});
   }
 
-  updateToken(Token token) async {
+  updateToken() async {
     final utoken = Token(
-      id: token.id,
+      id: widget.token!.id,
       name: nameController.text,
+      slug: slugController.text.toString(),
       address: addressController.text.toString(),
     );
     await MongoDatabase.updateToken(utoken);
     Navigator.pop(context);
+  }
+
+  deleteToken() async {
+    if (widget.token != null) {
+      await MongoDatabase.deleteToken(widget.token as Token);
+      setState(() {});
+    }
   }
 }

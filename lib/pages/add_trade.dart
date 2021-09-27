@@ -65,6 +65,16 @@ class _AddTradeState extends State<AddTrade> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_widgetText),
+        actions: <Widget>[
+          widget.trade != null
+              ? IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    deleteTrade();
+                  })
+              : Container(),
+        ],
       ),
       body: Stack(
         children: [
@@ -74,38 +84,37 @@ class _AddTradeState extends State<AddTrade> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ChoiceChip(
-                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                        label: Text(_types[0]),
-                        selected: _typeIndex == 0,
-                        selectedColor: _typeIndex == 0
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).canvasColor,
-                        onSelected: (bool selected) {
-                          setState(() {
-                            if (selected) {
+                      ActionChip(
+                          backgroundColor: _typeIndex == 0
+                              ? Colors.green.shade500
+                              : Colors.grey.shade700,
+                          label: Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(32, 16, 32, 16),
+                              child: const Text('BUY')),
+                          onPressed: () {
+                            setState(() {
                               _typeIndex = 0;
-                            }
-                          });
-                        },
+                            });
+                          }),
+                      Container(
+                        width: 32,
                       ),
-                      ChoiceChip(
-                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                        label: Text(_types[1]),
-                        selected: _typeIndex == 1,
-                        selectedColor: _typeIndex == 1
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).canvasColor,
-                        onSelected: (bool selected) {
-                          setState(() {
-                            if (selected) {
+                      ActionChip(
+                          backgroundColor: _typeIndex == 1
+                              ? Colors.green.shade500
+                              : Colors.grey.shade700,
+                          label: Container(
+                            padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+                            child: const Text('SELL'),
+                          ),
+                          onPressed: () {
+                            setState(() {
                               _typeIndex = 1;
-                            }
-                          });
-                        },
-                      ),
+                            });
+                          }),
                     ],
                   ),
                 ),
@@ -149,23 +158,17 @@ class _AddTradeState extends State<AddTrade> {
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 4.0),
-              child: ElevatedButton(
-                child: Text(_widgetText),
-                onPressed: () {
-                  if (widget.trade != null) {
-                    updateTrade();
-                  } else {
-                    insertTrade();
-                  }
-                },
-              ),
-            ),
-          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (widget.trade != null) {
+            updateTrade();
+          } else {
+            insertTrade();
+          }
+        },
+        child: const Icon(Icons.check),
       ),
     );
   }
@@ -177,20 +180,34 @@ class _AddTradeState extends State<AddTrade> {
         address: _selectedToken.address,
         amount: double.parse(amountController.text),
         limit: double.parse(limitController.text),
-        type: _types[_typeIndex]);
+        type: _types[_typeIndex],
+        success: false,
+        error: false);
+
     await MongoDatabase.addTrade(trade);
     Navigator.pop(context);
   }
 
   updateTrade() async {
-    final utrade = Trade(
-        id: widget.trade!.id,
-        token: _selectedToken.name,
-        address: _selectedToken.address,
-        amount: double.parse(amountController.text),
-        limit: double.parse(limitController.text),
-        type: _types[_typeIndex]);
-    await MongoDatabase.updateTrade(utrade);
+    if (widget.trade != null) {
+      final utrade = Trade(
+          id: widget.trade!.id,
+          token: _selectedToken.name,
+          address: _selectedToken.address,
+          amount: double.parse(amountController.text),
+          limit: double.parse(limitController.text),
+          type: _types[_typeIndex],
+          success: false,
+          error: false);
+      await MongoDatabase.updateTrade(utrade);
+    }
     Navigator.pop(context);
+  }
+
+  deleteTrade() async {
+    if (widget.trade != null) {
+      await MongoDatabase.deleteTrade(widget.trade as Trade);
+      setState(() {});
+    }
   }
 }
