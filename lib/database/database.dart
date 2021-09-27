@@ -31,7 +31,6 @@ class MongoDatabase {
     var tradeDB = db.collection(tradeCollection);
     var updatedTrade = await tradeDB.findOne(where.id(trade.id as ObjectId));
 
-    updatedTrade["address"] = trade.address ?? updatedTrade["address"];
     updatedTrade["type"] = trade.type ?? updatedTrade["type"];
     updatedTrade["token"] = trade.token ?? updatedTrade["token"];
     updatedTrade["amount"] = trade.amount ?? updatedTrade["amount"];
