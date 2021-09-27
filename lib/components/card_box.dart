@@ -70,6 +70,7 @@ class CardBox extends StatelessWidget {
                                   color: Colors.black, shape: BoxShape.circle),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
                                     trade.token.toString(),
@@ -88,6 +89,7 @@ class CardBox extends StatelessWidget {
                               color: Colors.black, shape: BoxShape.circle),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
                                 trade.token.toString(),

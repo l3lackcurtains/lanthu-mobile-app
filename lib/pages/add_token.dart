@@ -35,6 +35,7 @@ class _AddTokenState extends State<AddToken> {
       Token token = widget.token as Token;
       nameController.text = token.name.toString();
       addressController.text = token.address.toString();
+      slugController.text = token.slug.toString();
       _widgetText = 'Update Trade';
     }
   }
@@ -44,6 +45,7 @@ class _AddTokenState extends State<AddToken> {
     super.dispose();
     nameController.dispose();
     addressController.dispose();
+    slugController.dispose();
   }
 
   @override
