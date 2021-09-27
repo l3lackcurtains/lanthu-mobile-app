@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lanthu_bot/components/cardbox.dart';
+import 'package:lanthu_bot/components/card_box.dart';
 import 'package:lanthu_bot/database/database.dart';
+import 'package:lanthu_bot/models/token.dart';
 import 'package:lanthu_bot/models/trade.dart';
 import 'package:lanthu_bot/pages/add_trade.dart';
 
@@ -14,6 +15,15 @@ class _TradesState extends State<Trades> {
   @override
   void initState() {
     super.initState();
+  }
+
+  Future<Token> getFutureToken(Trade trade) async {
+    var newToken = await MongoDatabase.getToken(trade.token.toString());
+    if (newToken != null) {
+      Token token = Token.fromMap(newToken);
+      return token;
+    }
+    return const Token();
   }
 
   @override
@@ -41,9 +51,6 @@ class _TradesState extends State<Trades> {
                       padding: const EdgeInsets.all(8.0),
                       child: CardBox(
                         trade: Trade.fromMap(trades[index]),
-                        onTapDelete: () {
-                          deleteUser(Trade.fromMap(trades[index]));
-                        },
                         onTapEdit: () {
                           Navigator.push(
                             context,
@@ -53,6 +60,8 @@ class _TradesState extends State<Trades> {
                             }),
                           ).then((value) => setState(() {}));
                         },
+                        getFutureToken:
+                            getFutureToken(Trade.fromMap(trades[index])),
                       ),
                     ),
                     index == trades.length - 1

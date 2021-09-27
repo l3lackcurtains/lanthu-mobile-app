@@ -36,6 +36,8 @@ class MongoDatabase {
     updatedTrade["token"] = trade.token ?? updatedTrade["token"];
     updatedTrade["amount"] = trade.amount ?? updatedTrade["amount"];
     updatedTrade["limit"] = trade.limit ?? updatedTrade["limit"];
+    updatedTrade["success"] = trade.success ?? updatedTrade["success"];
+    updatedTrade["error"] = trade.error ?? updatedTrade["error"];
 
     await tradeDB.save(updatedTrade);
   }
@@ -59,6 +61,16 @@ class MongoDatabase {
     }
   }
 
+  static Future<dynamic> getToken(String tokenName) async {
+    var tokenDb = db.collection(tokenCollection);
+    try {
+      var token = await tokenDb.findOne(where.eq("name", tokenName));
+      return token;
+    } catch (e) {
+      return Future;
+    }
+  }
+
   static addToken(Token token) async {
     var tokenDB = db.collection(tokenCollection);
     await tokenDB.insertMany([token.toMap()]);
@@ -70,6 +82,7 @@ class MongoDatabase {
 
     updatedToken["address"] = token.address;
     updatedToken["name"] = token.name;
+    updatedToken["slug"] = token.slug;
 
     await tokenDB.save(updatedToken);
   }

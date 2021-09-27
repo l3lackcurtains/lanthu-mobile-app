@@ -46,9 +46,9 @@ class _HomePageState extends State<HomePage> {
             })).then((value) => setState(() {}));
           } else {
             Navigator.push(context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return const AddToken();
-                    })).then((value) => setState(() {}));
+                MaterialPageRoute(builder: (BuildContext context) {
+              return const AddToken();
+            })).then((value) => setState(() {}));
           }
         },
         child: const Icon(Icons.add),
@@ -56,16 +56,16 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.people),
+              icon: Icon(Icons.track_changes),
               label: "Trading",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.menu),
+              icon: Icon(Icons.cable),
               label: "Tokens",
             ),
           ],
           currentIndex: _selectedIndex,
-          fixedColor: Colors.deepPurple,
+          fixedColor: Colors.white,
           onTap: _onItemTapped,
           type: BottomNavigationBarType.fixed),
     );

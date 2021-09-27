@@ -7,14 +7,18 @@ class Trade {
   final String? token;
   final double? amount;
   final double? limit;
+  final bool? success;
+  final bool? error;
 
-  const Trade(
+  Trade(
       {this.id,
       this.address,
       this.type,
       this.token,
       this.amount,
-      this.limit});
+      this.limit,
+      this.success,
+      this.error});
 
   Map<String, dynamic> toMap() {
     return {
@@ -24,6 +28,8 @@ class Trade {
       'token': token,
       'amount': amount,
       'limit': limit,
+      'success': success,
+      'error': error
     };
   }
 
@@ -33,5 +39,7 @@ class Trade {
         type = map['type'],
         token = map['token'],
         amount = map['amount'],
-        limit = map['limit'];
+        limit = map['limit'],
+        success = map['success'],
+        error = map['error'];
 }

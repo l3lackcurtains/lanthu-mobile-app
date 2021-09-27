@@ -1,49 +1,74 @@
 // ignore_for_file: use_key_in_widget_constructors
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lanthu_bot/models/token.dart';
 
 class TokenBox extends StatelessWidget {
-  const TokenBox(
-      {required this.token,
-      required this.onTapDelete,
-      required this.onTapEdit});
+  const TokenBox({required this.token, required this.onTapEdit});
   final Token token;
-  final Function onTapEdit, onTapDelete;
+  final Function onTapEdit;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 2.0,
+      elevation: 3.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
       color: Theme.of(context).canvasColor,
       child: ListTile(
-        contentPadding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-        leading: token.name != null ? Image.network('https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${token.name.toString().toLowerCase()}.png') : const Text(""),
-        title: Text(token.name ?? ""),
+        onTap: () {
+          onTapEdit();
+        },
+        dense: false,
+        contentPadding: const EdgeInsets.fromLTRB(20, 0, 8, 16),
+        leading: token.slug != null
+            ? CachedNetworkImage(
+                errorWidget: (context, url, error) => Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                        color: Colors.black, shape: BoxShape.circle),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          token.name.toString(),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    )),
+                imageUrl:
+                    'https://raw.githubusercontent.com/ErikThiart/cryptocurrency-icons/master/128/${token.slug!.toString().toLowerCase()}.png',
+                width: 56,
+              )
+            : Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                    color: Colors.black, shape: BoxShape.circle),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      token.name.toString(),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                )),
+        title: Text(token.name.toString(),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Container(
+            Container(
               height: 8,
             ),
             Text(token.address.toString()),
-            
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            GestureDetector(
-              child: const Icon(Icons.edit),
-              onTap: () {
-                onTapEdit();
-              },
-            ),
-            GestureDetector(
-              child: const Icon(Icons.delete),
-              onTap: () {
-                onTapDelete();
-              },
+            Container(
+              height: 8,
             ),
           ],
         ),
