@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lanthu_bot/components/card_box.dart';
-import 'package:lanthu_bot/database/database.dart';
 import 'package:lanthu_bot/models/token.dart';
 import 'package:lanthu_bot/models/trade.dart';
 import 'package:lanthu_bot/pages/add_trade.dart';
+import 'package:http/http.dart' as http;
+import 'package:lanthu_bot/utils/constants.dart';
 
 class Trades extends StatefulWidget {
   const Trades({Key? key}) : super(key: key);
@@ -12,13 +16,37 @@ class Trades extends StatefulWidget {
 }
 
 class _TradesState extends State<Trades> {
+  List<dynamic> trades = [];
+  Future<List<dynamic>>? _futureTrades;
+
   @override
   void initState() {
     super.initState();
+    _futureTrades = fetchFutureTrades();
+  }
+
+  Future<List<dynamic>> fetchFutureTrades() async {
+    var client = http.Client();
+    try {
+      var url = Uri.parse('$apiUrl/trades');
+
+      var response = await client.get(url);
+
+      if (response.statusCode == 200) {
+        final resData = json.decode(response.body);
+        final List<dynamic> message = resData["message"];
+
+        trades.addAll(message.map((m) => Trade.fromMap(m)).toList());
+      }
+    } on SocketException {
+      client.close();
+      throw 'No Internet connection';
+    }
+    return trades;
   }
 
   Future<Token> getFutureToken(Trade trade) async {
-    var newToken = await MongoDatabase.getToken(trade.token.toString());
+    final newToken = await getToken(trade.token.toString());
     if (newToken != null) {
       Token token = Token.fromMap(newToken);
       return token;
@@ -26,10 +54,29 @@ class _TradesState extends State<Trades> {
     return const Token();
   }
 
+  Future<dynamic> getToken(String name) async {
+    var client = http.Client();
+    try {
+      var url = Uri.parse('$apiUrl/tokens/$name');
+
+      var response = await client.get(url);
+
+      if (response.statusCode == 200) {
+        final resData = json.decode(response.body);
+        final dynamic message = resData["message"];
+        return message;
+      }
+    } on SocketException {
+      client.close();
+      throw 'No Internet connection';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: MongoDatabase.getTrades(),
+        future: _futureTrades,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
@@ -40,7 +87,7 @@ class _TradesState extends State<Trades> {
             );
           } else {
             if (snapshot.hasData) {
-              final trades = snapshot.data as dynamic;
+              final trades = snapshot.data as List<dynamic>;
               return ListView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
@@ -50,18 +97,16 @@ class _TradesState extends State<Trades> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: CardBox(
-                        trade: Trade.fromMap(trades[index]),
+                        trade: trades[index],
                         onTapEdit: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (BuildContext context) {
-                              return AddTrade(
-                                  trade: Trade.fromMap(trades[index]));
+                              return AddTrade(trade: trades[index]);
                             }),
                           ).then((value) => setState(() {}));
                         },
-                        getFutureToken:
-                            getFutureToken(Trade.fromMap(trades[index])),
+                        getFutureToken: getFutureToken(trades[index]),
                       ),
                     ),
                     index == trades.length - 1
@@ -83,10 +128,5 @@ class _TradesState extends State<Trades> {
             }
           }
         });
-  }
-
-  deleteUser(Trade trade) async {
-    await MongoDatabase.deleteTrade(trade);
-    setState(() {});
   }
 }

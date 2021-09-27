@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lanthu_bot/database/database.dart';
 import 'package:lanthu_bot/models/token.dart';
 import 'package:lanthu_bot/models/trade.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
+import 'package:http/http.dart' as http;
+import 'package:lanthu_bot/utils/constants.dart';
 
 class AddTrade extends StatefulWidget {
   const AddTrade({Key? key, this.trade}) : super(key: key);
@@ -29,8 +33,28 @@ class _AddTradeState extends State<AddTrade> {
     initializeData();
   }
 
+  Future<List<Token>> getTokens() async {
+    var client = http.Client();
+    try {
+      var url = Uri.parse('$apiUrl/tokens');
+
+      var response = await client.get(url);
+
+      if (response.statusCode == 200) {
+        final resData = json.decode(response.body);
+        final List<dynamic> message = resData["message"];
+
+        tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+      }
+    } on SocketException {
+      client.close();
+      throw 'No Internet connection';
+    }
+    return tokens;
+  }
+
   void initializeData() async {
-    List<Token> allTokens = await MongoDatabase.getTokens();
+    List<Token> allTokens = await getTokens();
     setState(() {
       tokens = allTokens;
       _selectedToken = tokens[0];
@@ -174,38 +198,49 @@ class _AddTradeState extends State<AddTrade> {
   }
 
   insertTrade() async {
-    final trade = Trade(
-        id: mongo.ObjectId(),
-        token: _selectedToken.name,
-        amount: double.parse(amountController.text),
-        limit: double.parse(limitController.text),
-        type: _types[_typeIndex],
-        success: false,
-        error: false);
+    var dio = Dio();
 
-    await MongoDatabase.addTrade(trade);
-    Navigator.pop(context);
+    try {
+      await dio.post("$apiUrl/trades", data: {
+        "token": _selectedToken.name,
+        "amount": double.parse(amountController.text),
+        "limit": double.parse(limitController.text),
+        "type": _types[_typeIndex],
+        "success": false,
+        "error": false
+      });
+      Navigator.pop(context);
+    } catch (e) {
+      throw Exception('Failed to add trade');
+    }
   }
 
   updateTrade() async {
-    if (widget.trade != null) {
-      final utrade = Trade(
-          id: widget.trade!.id,
-          token: _selectedToken.name,
-          amount: double.parse(amountController.text),
-          limit: double.parse(limitController.text),
-          type: _types[_typeIndex],
-          success: false,
-          error: false);
-      await MongoDatabase.updateTrade(utrade);
+    var dio = Dio();
+    var tradeId = widget.trade!.id;
+    try {
+      await dio.put("$apiUrl/trades/$tradeId", data: {
+        "token": _selectedToken.name,
+        "amount": double.parse(amountController.text),
+        "limit": double.parse(limitController.text),
+        "type": _types[_typeIndex],
+        "success": false,
+        "error": false
+      });
+      Navigator.pop(context);
+    } catch (e) {
+      throw Exception('Failed to update trade');
     }
-    Navigator.pop(context);
   }
 
   deleteTrade() async {
-    if (widget.trade != null) {
-      await MongoDatabase.deleteTrade(widget.trade as Trade);
-      setState(() {});
+    var dio = Dio();
+    var tradeId = widget.trade!.id;
+    try {
+      await dio.delete("$apiUrl/trades/$tradeId");
+      Navigator.pop(context);
+    } catch (e) {
+      throw Exception('Failed to delete trade');
     }
   }
 }

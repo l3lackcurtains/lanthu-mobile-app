@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lanthu_bot/database/database.dart';
 
 import 'pages/home_page.dart';
 
 void main() async {
-  await MongoDatabase.connect();
   runApp(const MyApp());
 }
 
