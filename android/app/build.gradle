@@ -69,8 +69,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
-            useProguard true
+            shrinkResources false
             signingConfig signingConfigs.release
         }
 
@@ -87,4 +86,6 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation platform('com.google.firebase:firebase-bom:28.4.1')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-analytics'
 }
