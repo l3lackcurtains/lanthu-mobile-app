@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "691836451813",
+    "project_id": "lanthu-e136a",
+    "storage_bucket": "lanthu-e136a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:691836451813:android:f235335dc50fbedf3ccd0c",
+        "android_client_info": {
+          "package_name": "com.lanthu.bot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "691836451813-pv70hmu3d8qpjv8s5d7forodkujuukc4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAs1upH6X71Z9BiYDDv9E1mohK2MwaOrNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "691836451813-pv70hmu3d8qpjv8s5d7forodkujuukc4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

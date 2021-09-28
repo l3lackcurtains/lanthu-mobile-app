@@ -2,52 +2,51 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:lanthu_bot/components/token_box.dart';
-import 'package:lanthu_bot/models/token.dart';
-import 'package:lanthu_bot/pages/add_token.dart';
+import 'package:lanthu_bot/components/log_box.dart';
+import 'package:lanthu_bot/models/log.dart';
+import 'package:lanthu_bot/pages/log_details.dart';
 import 'package:http/http.dart' as http;
 import 'package:lanthu_bot/utils/constants.dart';
 
-class Tokens extends StatefulWidget {
-  const Tokens({Key? key}) : super(key: key);
+class Logs extends StatefulWidget {
+  const Logs({Key? key}) : super(key: key);
   @override
-  _TokensState createState() => _TokensState();
+  _LogsState createState() => _LogsState();
 }
 
-class _TokensState extends State<Tokens> {
-  List<dynamic> tokens = [];
-  Future<List<dynamic>>? _futureTokens;
+class _LogsState extends State<Logs> {
+  List<dynamic> logs = [];
+  Future<List<dynamic>>? _futureLogs;
 
   @override
   void initState() {
     super.initState();
-    _futureTokens = fetchFutureTokens();
+    _futureLogs = fetchFutureLogs();
   }
 
-  Future<List<dynamic>> fetchFutureTokens() async {
+  Future<List<dynamic>> fetchFutureLogs() async {
     var client = http.Client();
     try {
-      var url = Uri.parse('$apiUrl/tokens');
+      var url = Uri.parse('$apiUrl/logs');
 
       var response = await client.get(url);
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
         final List<dynamic> message = resData["message"];
-
-        tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+        logs.addAll(message.map((m) => Log.fromMap(m)).toList());
       }
     } on SocketException {
       client.close();
       throw 'No Internet connection';
     }
-    return tokens;
+    return logs;
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _futureTokens,
+        future: _futureLogs,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
@@ -58,22 +57,22 @@ class _TokensState extends State<Tokens> {
             );
           } else {
             if (snapshot.hasData) {
-              final tokensList = snapshot.data as List<dynamic>;
+              final logsList = snapshot.data as List<dynamic>;
               return ListView.builder(
-                shrinkWrap: true,
                 scrollDirection: Axis.vertical,
-                itemCount: tokensList.length,
+                itemCount: logsList.length,
+                shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: TokenBox(
-                      token: tokensList[index],
+                    child: LogBox(
+                      log: logsList[index] as Log,
                       onTapEdit: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return AddToken(token: tokensList[index]);
+                              return LogDetails(log: logsList[index]);
                             },
                           ),
                         ).then((value) => setState(() {}));
