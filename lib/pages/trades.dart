@@ -87,29 +87,29 @@ class _TradesState extends State<Trades> {
             );
           } else {
             if (snapshot.hasData) {
-              final trades = snapshot.data as List<dynamic>;
+              final tradesList = snapshot.data as List<dynamic>;
               return ListView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
-                itemCount: trades.length,
+                itemCount: tradesList.length,
                 itemBuilder: (context, index) {
                   return Column(children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: CardBox(
-                        trade: trades[index],
+                        trade: tradesList[index],
                         onTapEdit: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (BuildContext context) {
-                              return AddTrade(trade: trades[index]);
+                              return AddTrade(trade: tradesList[index]);
                             }),
                           ).then((value) => setState(() {}));
                         },
-                        getFutureToken: getFutureToken(trades[index]),
+                        getFutureToken: getFutureToken(tradesList[index]),
                       ),
                     ),
-                    index == trades.length - 1
+                    index == tradesList.length - 1
                         ? Container(height: 60)
                         : Container()
                   ]);

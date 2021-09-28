@@ -125,9 +125,9 @@ class _AddTokenState extends State<AddToken> {
 
   updateToken() async {
     var dio = Dio();
-    var id = widget.token!.id;
+    var tokenName = widget.token!.name;
     try {
-      await dio.put("$apiUrl/tokens/$id", data: {
+      await dio.put("$apiUrl/tokens/$tokenName", data: {
         "name": nameController.text,
         "slug": slugController.text.toString(),
         "address": addressController.text.toString(),
