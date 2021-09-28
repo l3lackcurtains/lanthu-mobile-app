@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "691836451813-a5kud2f36hs5e67esbfuc5ftliksjoh3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lanthu.bot",
+            "certificate_hash": "ef2ae6c4749537ea1abcc07bfcfd2db3f9e38356"
+          }
+        },
+        {
           "client_id": "691836451813-pv70hmu3d8qpjv8s5d7forodkujuukc4.apps.googleusercontent.com",
           "client_type": 3
         }

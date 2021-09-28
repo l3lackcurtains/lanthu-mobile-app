@@ -59,14 +59,14 @@ class _LogsState extends State<Logs> {
             if (snapshot.hasData) {
               final logsList = snapshot.data as List<dynamic>;
               return ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.vertical,
                 itemCount: logsList.length,
-                shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: LogBox(
-                      log: logsList[index] as Log,
+                      log: logsList[index],
                       onTapEdit: () {
                         Navigator.push(
                           context,

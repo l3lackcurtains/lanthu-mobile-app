@@ -21,21 +21,9 @@ class LogBox extends StatelessWidget {
           onTapEdit();
         },
         dense: false,
-        contentPadding: const EdgeInsets.fromLTRB(20, 0, 8, 16),
-        title: Text(log.message.toString(),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 8,
-            ),
-            Text(log.details.toString().substring(0, 50)),
-            Container(
-              height: 8,
-            ),
-          ],
-        ),
+        contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 16),
+        title:
+            Text(log.message.toString(), style: const TextStyle(fontSize: 16)),
       ),
     );
   }
