@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lanthu_bot/models/token.dart';
+import 'package:lanthu_bot/models/token_info.dart';
 import 'package:lanthu_bot/models/trade.dart';
 import 'package:http/http.dart' as http;
 import 'package:lanthu_bot/utils/constants.dart';
@@ -22,7 +23,7 @@ class _AddTradeState extends State<AddTrade> {
   TextEditingController limitController = TextEditingController();
 
   List<Token> tokens = [];
-  Token _selectedToken = const Token();
+  Token _selectedToken = const Token(name: "BNB");
   int _typeIndex = 0;
   final List<String> _types = ["BUY", "SELL"];
   String _widgetText = "Add Trade";
@@ -51,6 +52,29 @@ class _AddTradeState extends State<AddTrade> {
       throw 'No Internet connection';
     }
     return tokens;
+  }
+
+  Future<TokenInfo> getTokenInfo(String token) async {
+    var client = http.Client();
+    TokenInfo tokenInfo = const TokenInfo();
+
+    try {
+      var url = Uri.parse('$apiUrl/tokeninfo/${token.toString()}');
+
+      var response = await client.get(url);
+
+      if (response.statusCode == 200) {
+        final resData = json.decode(response.body);
+        final Map<String, dynamic> message = resData["message"];
+
+        tokenInfo = TokenInfo.fromMap(message);
+      }
+    } on SocketException {
+      client.close();
+      throw 'No Internet connection';
+    }
+
+    return tokenInfo;
   }
 
   void initializeData() async {
@@ -168,7 +192,9 @@ class _AddTradeState extends State<AddTrade> {
                   child: TextField(
                     keyboardType: TextInputType.number,
                     controller: amountController,
-                    decoration: const InputDecoration(labelText: 'Amount'),
+                    decoration: const InputDecoration(
+                      labelText: 'Amount',
+                    ),
                   ),
                 ),
                 Padding(
@@ -179,6 +205,62 @@ class _AddTradeState extends State<AddTrade> {
                     decoration: const InputDecoration(labelText: 'Limit'),
                   ),
                 ),
+                Container(height: 16),
+                FutureBuilder(
+                    future: getTokenInfo(_selectedToken.name.toString()),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container(height: 150);
+                      } else {
+                        if (snapshot.hasData) {
+                          final tokenInfo = snapshot.data as TokenInfo;
+                          return Material(
+                            child: Container(
+                              height: 150,
+                              padding: const EdgeInsets.all(16.0),
+                              child: ListTile(
+                                title: Text(
+                                    "${tokenInfo.token} (${tokenInfo.price.toString()})"),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      height: 8,
+                                    ),
+                                    Text(
+                                        "${tokenInfo.balance} ${tokenInfo.token}"),
+                                    Container(
+                                      height: 8,
+                                    ),
+                                    Text("${tokenInfo.busdBalance} BUSD"),
+                                    Container(
+                                      height: 8,
+                                    ),
+                                    TextButton(
+                                      child: const Text('INSERT MAX'),
+                                      onPressed: () {
+                                        amountController.text =
+                                            tokenInfo.balance.toString();
+                                      },
+                                    ),
+                                    Container(
+                                      height: 8,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Container(
+                          color: Colors.black,
+                          child: const LinearProgressIndicator(
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }),
               ],
             ),
           ),
