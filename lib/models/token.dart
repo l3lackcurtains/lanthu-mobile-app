@@ -3,16 +3,24 @@ class Token {
   final String? address;
   final String? name;
   final String? slug;
+  final String? swapWith;
 
-  const Token({this.id, this.name, this.address, this.slug});
+  const Token({this.id, this.name, this.address, this.slug, this.swapWith});
 
   Map<String, dynamic> toMap() {
-    return {'_id': id, 'name': name, 'address': address, 'slug': slug};
+    return {
+      '_id': id,
+      'name': name,
+      'address': address,
+      'slug': slug,
+      'swapWith': swapWith
+    };
   }
 
   Token.fromMap(Map<String, dynamic> map)
       : id = map['_id'].toString(),
         name = map['name'],
         address = map['address'],
-        slug = map['slug'];
+        slug = map['slug'],
+        swapWith = map['swapWith'];
 }

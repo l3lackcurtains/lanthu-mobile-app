@@ -27,6 +27,8 @@ class _TokensState extends State<Tokens> {
 
   Future<List<dynamic>> fetchFutureTokens() async {
     var client = http.Client();
+
+    tokens = [];
     try {
       var url = Uri.parse('$apiUrl/tokens');
 
@@ -34,9 +36,11 @@ class _TokensState extends State<Tokens> {
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        final List<dynamic> message = resData["message"];
+        if (resData["message"] is! String) {
+          final List<dynamic> message = resData["message"];
 
-        tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+          tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+        }
       }
     } on SocketException {
       client.close();
@@ -102,7 +106,11 @@ class _TokensState extends State<Tokens> {
                               return AddToken(token: tokensList[index]);
                             },
                           ),
-                        ).then((value) => setState(() {}));
+                        ).then((value) {
+                          setState(() {
+                            _futureTokens = fetchFutureTokens();
+                          });
+                        });
                       },
                     ),
                   );

@@ -43,9 +43,11 @@ class _AddTradeState extends State<AddTrade> {
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        final List<dynamic> message = resData["message"];
 
-        tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+        if (resData["message"] is! String) {
+          final List<dynamic> message = resData["message"];
+          tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
+        }
       }
     } on SocketException {
       client.close();
@@ -65,9 +67,11 @@ class _AddTradeState extends State<AddTrade> {
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        final Map<String, dynamic> message = resData["message"];
 
-        tokenInfo = TokenInfo.fromMap(message);
+        if (resData["message"] is! String) {
+          final Map<String, dynamic> message = resData["message"];
+          tokenInfo = TokenInfo.fromMap(message);
+        }
       }
     } on SocketException {
       client.close();
@@ -182,7 +186,8 @@ class _AddTradeState extends State<AddTrade> {
                     items: tokens.map((tkn) {
                       return DropdownMenuItem<Token>(
                         value: tkn,
-                        child: Text(tkn.name!.toUpperCase()),
+                        child: Text(
+                            "${tkn.name!.toUpperCase()} (${tkn.swapWith})"),
                       );
                     }).toList(),
                   ),
@@ -216,7 +221,7 @@ class _AddTradeState extends State<AddTrade> {
                           final tokenInfo = snapshot.data as TokenInfo;
                           return Material(
                             child: Container(
-                              height: 150,
+                              height: 180,
                               padding: const EdgeInsets.all(16.0),
                               child: ListTile(
                                 title: Text(
@@ -229,6 +234,10 @@ class _AddTradeState extends State<AddTrade> {
                                     ),
                                     Text(
                                         "${tokenInfo.balance} ${tokenInfo.token}"),
+                                    Container(
+                                      height: 8,
+                                    ),
+                                    Text("${tokenInfo.bnbBalance} BNB"),
                                     Container(
                                       height: 8,
                                     ),

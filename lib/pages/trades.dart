@@ -27,6 +27,7 @@ class _TradesState extends State<Trades> {
 
   Future<List<dynamic>> fetchFutureTrades() async {
     var client = http.Client();
+    trades = [];
     try {
       var url = Uri.parse('$apiUrl/trades');
 
@@ -34,9 +35,11 @@ class _TradesState extends State<Trades> {
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        final List<dynamic> message = resData["message"];
+        if (resData["message"] is! String) {
+          final List<dynamic> message = resData["message"];
 
-        trades.addAll(message.map((m) => Trade.fromMap(m)).toList());
+          trades.addAll(message.map((m) => Trade.fromMap(m)).toList());
+        }
       }
     } on SocketException {
       client.close();
@@ -63,8 +66,11 @@ class _TradesState extends State<Trades> {
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        final dynamic message = resData["message"];
-        return message;
+        if (resData["message"] is! String) {
+          final dynamic message = resData["message"];
+          return message;
+        }
+        return null;
       }
     } on SocketException {
       client.close();
@@ -104,7 +110,9 @@ class _TradesState extends State<Trades> {
                             MaterialPageRoute(builder: (BuildContext context) {
                               return AddTrade(trade: tradesList[index]);
                             }),
-                          ).then((value) => setState(() {}));
+                          ).then((value) => setState(() {
+                                _futureTrades = fetchFutureTrades();
+                              }));
                         },
                         getFutureToken: getFutureToken(tradesList[index]),
                       ),
