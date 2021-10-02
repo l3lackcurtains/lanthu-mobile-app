@@ -4,8 +4,15 @@ class Token {
   final String? name;
   final String? slug;
   final String? swapWith;
+  final int? decimal;
 
-  const Token({this.id, this.name, this.address, this.slug, this.swapWith});
+  const Token(
+      {this.id,
+      this.name,
+      this.address,
+      this.slug,
+      this.swapWith,
+      this.decimal});
 
   Map<String, dynamic> toMap() {
     return {
@@ -13,7 +20,8 @@ class Token {
       'name': name,
       'address': address,
       'slug': slug,
-      'swapWith': swapWith
+      'swapWith': swapWith,
+      'decimal': decimal
     };
   }
 
@@ -22,5 +30,6 @@ class Token {
         name = map['name'],
         address = map['address'],
         slug = map['slug'],
-        swapWith = map['swapWith'];
+        swapWith = map['swapWith'],
+        decimal = map['decimal'];
 }
