@@ -33,8 +33,10 @@ class _LogsState extends State<Logs> {
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        final List<dynamic> message = resData["message"];
-        logs.addAll(message.map((m) => Log.fromMap(m)).toList());
+        if (resData["message"] is! String) {
+          final List<dynamic> message = resData["message"];
+          logs.addAll(message.map((m) => Log.fromMap(m)).toList());
+        }
       }
     } on SocketException {
       client.close();
@@ -75,7 +77,9 @@ class _LogsState extends State<Logs> {
                               return LogDetails(log: logsList[index]);
                             },
                           ),
-                        ).then((value) => setState(() {}));
+                        ).then((value) => setState(() {
+                              _futureLogs = fetchFutureLogs();
+                            }));
                       },
                     ),
                   );

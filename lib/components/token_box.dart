@@ -91,11 +91,11 @@ class TokenBox extends StatelessWidget {
                           children: [
                             tokenInfo.price != null
                                 ? Text(
-                                    "Price: ${double.parse(tokenInfo.price.toString()).toStringAsFixed(2)} USD")
+                                    "Price: ${double.parse(tokenInfo.price.toString()).toStringAsFixed(4)} USD")
                                 : const Text("N/A"),
                             tokenInfo.balance != null
                                 ? Text(
-                                    "Balance: ${double.parse(tokenInfo.balance.toString()).toStringAsFixed(2)} ${tokenInfo.token}")
+                                    "Balance: ${double.parse(tokenInfo.balance.toString()).toStringAsFixed(4)} ${tokenInfo.token}")
                                 : const Text(""),
                           ],
                         ),

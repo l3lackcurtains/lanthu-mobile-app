@@ -22,6 +22,8 @@ class _AddTokenState extends State<AddToken> {
   TextEditingController addressController = TextEditingController();
   TextEditingController slugController = TextEditingController();
 
+  String _selectSwapWith = "BNB";
+
   String _widgetText = "Add Token";
 
   @override
@@ -35,6 +37,7 @@ class _AddTokenState extends State<AddToken> {
       Token token = widget.token as Token;
       nameController.text = token.name.toString();
       addressController.text = token.address.toString();
+      _selectSwapWith = token.swapWith.toString();
       slugController.text = token.slug.toString();
       _widgetText = 'Update Trade';
     }
@@ -68,6 +71,7 @@ class _AddTokenState extends State<AddToken> {
         children: [
           SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -81,6 +85,33 @@ class _AddTokenState extends State<AddToken> {
                   child: TextField(
                     controller: addressController,
                     decoration: const InputDecoration(labelText: 'Address'),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(8, 16, 8, 4),
+                  child: Text("Swap with"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownButton<String>(
+                    value: _selectSwapWith,
+                    icon: const Icon(Icons.arrow_downward),
+                    itemHeight: 60,
+                    isExpanded: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectSwapWith = newValue!;
+                      });
+                    },
+                    items: <String>[
+                      'BNB',
+                      'BUSD',
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
                 ),
                 Padding(
@@ -116,6 +147,7 @@ class _AddTokenState extends State<AddToken> {
         "name": nameController.text.toString(),
         "slug": slugController.text.toString(),
         "address": addressController.text.toString(),
+        "swapWith": _selectSwapWith,
       });
       Navigator.pop(context);
     } catch (e) {
@@ -131,6 +163,7 @@ class _AddTokenState extends State<AddToken> {
         "name": nameController.text,
         "slug": slugController.text.toString(),
         "address": addressController.text.toString(),
+        "swapWith": _selectSwapWith,
       });
       Navigator.pop(context);
     } catch (e) {
