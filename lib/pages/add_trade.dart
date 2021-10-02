@@ -114,6 +114,54 @@ class _AddTradeState extends State<AddTrade> {
 
   @override
   Widget build(BuildContext context) {
+    final AlertDialog insertDialog = AlertDialog(
+      title: const Text('Add new Trade'),
+      contentPadding: const EdgeInsets.all(24),
+      content: const Text("Are you sure, you want to add this token?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Nope'),
+        ),
+        TextButton(
+          onPressed: () => insertTrade(),
+          child: const Text('Sure'),
+        ),
+      ],
+    );
+
+    final AlertDialog updateDialog = AlertDialog(
+      title: const Text('Upate Trade'),
+      contentPadding: const EdgeInsets.all(24),
+      content: const Text("Are you sure, you want to update this trade?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Nope'),
+        ),
+        TextButton(
+          onPressed: () => updateTrade(),
+          child: const Text('Sure'),
+        ),
+      ],
+    );
+
+    final AlertDialog deleteDialog = AlertDialog(
+      title: const Text('Delete Trade'),
+      contentPadding: const EdgeInsets.all(24),
+      content: const Text("Are you sure, you want to delete this trade?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Nope'),
+        ),
+        TextButton(
+          onPressed: () => deleteTrade(),
+          child: const Text('Sure'),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_widgetText),
@@ -122,8 +170,8 @@ class _AddTradeState extends State<AddTrade> {
               ? IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    Navigator.pop(context);
-                    deleteTrade();
+                    showDialog<void>(
+                        context: context, builder: (context) => deleteDialog);
                   })
               : Container(),
         ],
@@ -278,9 +326,11 @@ class _AddTradeState extends State<AddTrade> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (widget.trade != null) {
-            updateTrade();
+            showDialog<void>(
+                context: context, builder: (context) => updateDialog);
           } else {
-            insertTrade();
+            showDialog<void>(
+                context: context, builder: (context) => insertDialog);
           }
         },
         child: const Icon(Icons.check),
@@ -301,6 +351,7 @@ class _AddTradeState extends State<AddTrade> {
         "error": false
       });
       Navigator.pop(context);
+      Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to add trade');
     }
@@ -319,6 +370,7 @@ class _AddTradeState extends State<AddTrade> {
         "error": false
       });
       Navigator.pop(context);
+      Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to update trade');
     }
@@ -329,6 +381,7 @@ class _AddTradeState extends State<AddTrade> {
     var tradeId = widget.trade!.id;
     try {
       await dio.delete("$apiUrl/trades/$tradeId");
+      Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to delete trade');

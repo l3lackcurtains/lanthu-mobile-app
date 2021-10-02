@@ -21,6 +21,7 @@ class _AddTokenState extends State<AddToken> {
   TextEditingController nameController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController slugController = TextEditingController();
+  TextEditingController decimalController = TextEditingController();
 
   String _selectSwapWith = "BNB";
 
@@ -39,6 +40,7 @@ class _AddTokenState extends State<AddToken> {
       addressController.text = token.address.toString();
       _selectSwapWith = token.swapWith.toString();
       slugController.text = token.slug.toString();
+      decimalController.text = token.decimal.toString();
       _widgetText = 'Update Trade';
     }
   }
@@ -49,10 +51,59 @@ class _AddTokenState extends State<AddToken> {
     nameController.dispose();
     addressController.dispose();
     slugController.dispose();
+    decimalController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final AlertDialog insertDialog = AlertDialog(
+      title: const Text('Add new Token'),
+      contentPadding: const EdgeInsets.all(24),
+      content: const Text("Are you sure, you want add this token?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Nope'),
+        ),
+        TextButton(
+          onPressed: () => insertToken(),
+          child: const Text('Sure'),
+        ),
+      ],
+    );
+
+    final AlertDialog updateDialog = AlertDialog(
+      title: const Text('Upate Token'),
+      contentPadding: const EdgeInsets.all(24),
+      content: const Text("Are you sure, you want to update this token?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Nope'),
+        ),
+        TextButton(
+          onPressed: () => updateToken(),
+          child: const Text('Sure'),
+        ),
+      ],
+    );
+
+    final AlertDialog deleteDialog = AlertDialog(
+      title: const Text('Delete Token'),
+      contentPadding: const EdgeInsets.all(24),
+      content: const Text("Are you sure, you want to delete this token?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Nope'),
+        ),
+        TextButton(
+          onPressed: () => deleteToken(),
+          child: const Text('Sure'),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_widgetText),
@@ -61,8 +112,8 @@ class _AddTokenState extends State<AddToken> {
               ? IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    Navigator.pop(context);
-                    deleteToken();
+                    showDialog<void>(
+                        context: context, builder: (context) => deleteDialog);
                   })
               : Container(),
         ],
@@ -85,6 +136,14 @@ class _AddTokenState extends State<AddToken> {
                   child: TextField(
                     controller: addressController,
                     decoration: const InputDecoration(labelText: 'Address'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: decimalController,
+                    decoration: const InputDecoration(labelText: 'Decimal'),
                   ),
                 ),
                 const Padding(
@@ -129,9 +188,11 @@ class _AddTokenState extends State<AddToken> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (widget.token != null) {
-            updateToken();
+            showDialog<void>(
+                context: context, builder: (context) => updateDialog);
           } else {
-            insertToken();
+            showDialog<void>(
+                context: context, builder: (context) => insertDialog);
           }
         },
         child: const Icon(Icons.check),
@@ -148,7 +209,9 @@ class _AddTokenState extends State<AddToken> {
         "slug": slugController.text.toString(),
         "address": addressController.text.toString(),
         "swapWith": _selectSwapWith,
+        "decimal": int.parse(decimalController.text.toString()),
       });
+      Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to add token');
@@ -164,7 +227,9 @@ class _AddTokenState extends State<AddToken> {
         "slug": slugController.text.toString(),
         "address": addressController.text.toString(),
         "swapWith": _selectSwapWith,
+        "decimal": int.parse(decimalController.text.toString()),
       });
+      Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to update token.');
@@ -176,6 +241,7 @@ class _AddTokenState extends State<AddToken> {
     var tokenName = widget.token!.name;
     try {
       await dio.delete("$apiUrl/tokens/$tokenName");
+      Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to delete token');
