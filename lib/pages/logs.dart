@@ -26,6 +26,7 @@ class _LogsState extends State<Logs> {
 
   Future<List<dynamic>> fetchFutureLogs() async {
     var client = http.Client();
+    logs = [];
     try {
       var url = Uri.parse('$apiUrl/logs');
 
