@@ -228,8 +228,10 @@ class _AddTokenState extends State<AddToken> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to add token');
     }
@@ -262,8 +264,10 @@ class _AddTokenState extends State<AddToken> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to update token.');
     }
@@ -285,8 +289,10 @@ class _AddTokenState extends State<AddToken> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to delete token');
     }

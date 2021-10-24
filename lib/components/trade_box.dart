@@ -92,33 +92,38 @@ class TradeBox extends StatelessWidget {
                             ),
                           ],
                         )),
-                title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                        child: Text(trade.token?.name ?? "",
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w600)),
-                      ),
-                      Text(
-                        trade.amount!.toStringAsFixed(6) +
-                            " " +
-                            trade.token!.name.toString(),
-                        style: TextStyle(
-                            fontSize: 13, color: Colors.white.withOpacity(0.7)),
-                      ),
-                    ]),
+                title: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                          child: Text(trade.token?.name ?? "",
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w600)),
+                        ),
+                        Text(
+                          trade.amount!.toStringAsFixed(8) +
+                              " " +
+                              trade.token!.name.toString(),
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.9)),
+                        ),
+                      ]),
+                ),
                 subtitle: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Chip(
                         backgroundColor: statusColor,
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
                         label: Text(
                           status,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white,
+                              color: Colors.white.withOpacity(0.8),
                               fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -139,25 +144,25 @@ class TradeBox extends StatelessWidget {
                     ]),
               ),
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      "BUY: " + trade.buyLimit!.toStringAsFixed(6),
+                      "BUY: " + trade.buyLimit!.toStringAsFixed(8),
                       style: TextStyle(
-                          fontSize: 12, color: Colors.white.withOpacity(0.7)),
+                          fontSize: 11, color: Colors.white.withOpacity(0.7)),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      "SELL: " + trade.sellLimit!.toStringAsFixed(6),
+                      "SELL: " + trade.sellLimit!.toStringAsFixed(8),
                       style: TextStyle(
-                          fontSize: 12, color: Colors.white.withOpacity(0.7)),
+                          fontSize: 11, color: Colors.white.withOpacity(0.7)),
                     ),
                     const SizedBox(width: 8),
-                    Text("STOP: " + trade.stopLossLimit!.toStringAsFixed(6),
+                    Text("STOP: " + trade.stopLossLimit!.toStringAsFixed(8),
                         style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: Colors.white.withOpacity(0.7))),
                     const SizedBox(width: 8),
                   ],

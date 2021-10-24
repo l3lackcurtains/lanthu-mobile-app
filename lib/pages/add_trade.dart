@@ -9,6 +9,7 @@ import 'package:lanthu_bot/models/token_info.dart';
 import 'package:lanthu_bot/models/trade.dart';
 import 'package:http/http.dart' as http;
 import 'package:lanthu_bot/utils/constants.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class AddTrade extends StatefulWidget {
   const AddTrade({Key? key, this.trade}) : super(key: key);
@@ -237,8 +238,8 @@ class _AddTradeState extends State<AddTrade> {
                               ? const Color(0xFF5f27cd)
                               : Colors.grey.shade700,
                           label: Container(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                              child: const Text('INIT')),
+                              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                              child: const Text('BUYING')),
                           onPressed: () {
                             setState(() {
                               _typeIndex = 0;
@@ -249,8 +250,8 @@ class _AddTradeState extends State<AddTrade> {
                               ? const Color(0xFF5f27cd)
                               : Colors.grey.shade700,
                           label: Container(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            child: const Text('BOUGHT'),
+                            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                            child: const Text('SELLING'),
                           ),
                           onPressed: () {
                             setState(() {
@@ -262,8 +263,8 @@ class _AddTradeState extends State<AddTrade> {
                               ? const Color(0xFF44bd32)
                               : Colors.grey.shade700,
                           label: Container(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            child: const Text('SOLD'),
+                            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                            child: const Text('COMPLETED'),
                           ),
                           onPressed: () {
                             setState(() {
@@ -275,7 +276,7 @@ class _AddTradeState extends State<AddTrade> {
                               ? Colors.red.shade500
                               : Colors.grey.shade700,
                           label: Container(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                             child: const Text('ERROR'),
                           ),
                           onPressed: () {
@@ -450,8 +451,10 @@ class _AddTradeState extends State<AddTrade> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to add trade');
     }
@@ -486,11 +489,15 @@ class _AddTradeState extends State<AddTrade> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to update trade');
     }
+
+    context.loaderOverlay.hide();
   }
 
   deleteTrade() async {
@@ -509,8 +516,10 @@ class _AddTradeState extends State<AddTrade> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to delete trade');
     }

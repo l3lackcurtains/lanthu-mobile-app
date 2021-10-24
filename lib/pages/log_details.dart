@@ -66,7 +66,9 @@ class _LogDetailsState extends State<LogDetails> {
     var dio = Dio();
     try {
       await dio.post("$apiUrl/graphql", data: {"query": query});
-      Navigator.pop(context);
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        Navigator.pop(context);
+      });
     } catch (e) {
       throw Exception('Failed to delete log');
     }

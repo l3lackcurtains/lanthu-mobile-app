@@ -62,8 +62,21 @@ class TokenBox extends StatelessWidget {
                     ),
                   ],
                 )),
-        title: Text(token.name.toString(),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        title: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(token.name.toString(),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w600)),
+              token.info?.price != null
+                  ? Text(
+                      "${double.parse(token.info?.price.toString() ?? "0").toStringAsFixed(8)} \$")
+                  : const Text("N/A"),
+            ],
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -71,18 +84,13 @@ class TokenBox extends StatelessWidget {
               height: 8,
             ),
             Container(
-              margin: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-              height: 32,
+              margin: const EdgeInsets.fromLTRB(0, 4, 0, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  token.info?.price != null
-                      ? Text(
-                          "Price: ${double.parse(token.info?.price.toString() ?? "0")} USD")
-                      : const Text("N/A"),
                   token.info?.balance != null
                       ? Text(
-                          "Balance: ${double.parse(token.info?.balance.toString() ?? "0")} ${token.name}")
+                          "${double.parse(token.info?.balance.toString() ?? "0").toStringAsFixed(8)} ${token.name}")
                       : const Text(""),
                 ],
               ),
