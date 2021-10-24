@@ -54,7 +54,7 @@ class _AddTradeState extends State<AddTrade> {
               """;
 
     try {
-      var uri = Uri.parse('$apiUrl/?query=$query');
+      var uri = Uri.parse('$graphUrl/?query=$query');
 
       var response = await client.get(
         uri,
@@ -98,7 +98,7 @@ class _AddTradeState extends State<AddTrade> {
               """;
 
     try {
-      var uri = Uri.parse('$apiUrl/?query=$query');
+      var uri = Uri.parse('$graphUrl/?query=$query');
       var response = await client.get(
         uri,
         headers: {
@@ -450,7 +450,7 @@ class _AddTradeState extends State<AddTrade> {
 
     var dio = Dio();
     try {
-      await dio.post("$apiUrl/graphql", data: {"query": query});
+      await dio.post("$graphUrl/graphql", data: {"query": query});
       Future.delayed(const Duration(milliseconds: 2000), () {
         Navigator.pop(context);
         Navigator.pop(context);
@@ -488,7 +488,7 @@ class _AddTradeState extends State<AddTrade> {
         }""";
     var dio = Dio();
     try {
-      await dio.post("$apiUrl/graphql", data: {"query": query});
+      await dio.post("$graphUrl/graphql", data: {"query": query});
       Future.delayed(const Duration(milliseconds: 2000), () {
         Navigator.pop(context);
         Navigator.pop(context);
@@ -515,7 +515,7 @@ class _AddTradeState extends State<AddTrade> {
         }""";
     var dio = Dio();
     try {
-      await dio.post("$apiUrl/graphql", data: {"query": query});
+      await dio.post("$graphUrl/graphql", data: {"query": query});
       Future.delayed(const Duration(milliseconds: 2000), () {
         Navigator.pop(context);
         Navigator.pop(context);

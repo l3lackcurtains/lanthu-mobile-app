@@ -26,42 +26,51 @@ class TokenBox extends StatelessWidget {
         },
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(20, 0, 8, 16),
-        leading: token.slug != null
-            ? CachedNetworkImage(
-                errorWidget: (context, url, error) => Container(
-                    width: 56,
-                    height: 56,
-                    decoration: const BoxDecoration(
-                        color: Colors.black, shape: BoxShape.circle),
+        leading: ClipOval(
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(8),
+            child: token.slug != null
+                ? CachedNetworkImage(
+                    errorWidget: (context, url, error) => SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            token.name.toString(),
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                    imageUrl:
+                        'https://raw.githubusercontent.com/ErikThiart/cryptocurrency-icons/master/128/${token.slug!.toString().toLowerCase()}.png',
+                    width: 32,
+                  )
+                : SizedBox(
+                    width: 32,
+                    height: 32,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           token.name.toString(),
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     )),
-                imageUrl:
-                    'https://raw.githubusercontent.com/ErikThiart/cryptocurrency-icons/master/128/${token.slug!.toString().toLowerCase()}.png',
-                width: 56,
-              )
-            : Container(
-                width: 56,
-                height: 56,
-                decoration: const BoxDecoration(
-                    color: Colors.black, shape: BoxShape.circle),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      token.name.toString(),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
-                )),
+          ),
+        ),
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
           child: Row(

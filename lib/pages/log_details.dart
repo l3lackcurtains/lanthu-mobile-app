@@ -65,7 +65,7 @@ class _LogDetailsState extends State<LogDetails> {
         }""";
     var dio = Dio();
     try {
-      await dio.post("$apiUrl/graphql", data: {"query": query});
+      await dio.post("$graphUrl/graphql", data: {"query": query});
       Future.delayed(const Duration(milliseconds: 2000), () {
         Navigator.pop(context);
       });

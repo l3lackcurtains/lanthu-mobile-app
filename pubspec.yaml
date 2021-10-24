@@ -40,3 +40,5 @@ flutter:
   assets:
     - assets/success.png
     - assets/error.png
+    - assets/logo.png
+    - assets/bot.png

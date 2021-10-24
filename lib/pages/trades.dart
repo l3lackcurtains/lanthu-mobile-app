@@ -50,7 +50,7 @@ class _TradesState extends State<Trades> {
               """;
 
     try {
-      var uri = Uri.parse('$apiUrl/?query=$query');
+      var uri = Uri.parse('$graphUrl/?query=$query');
 
       var response = await client.get(
         uri,

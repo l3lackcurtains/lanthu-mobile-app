@@ -40,6 +40,7 @@ class _HomePageState extends State<HomePage> {
         if (response.statusCode == 200) {
           final resData = json.decode(response.body);
           final dynamic message = resData["message"];
+
           if (message == null) {
             var dio = Dio();
             await dio.post("$apiUrl/devices", data: {
@@ -81,7 +82,18 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lanthu'),
+        title: Row(
+          children: [
+            Image.asset(
+              "assets/bot.png",
+              scale: 14,
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            const Text('Lanthu Bot'),
+          ],
+        ),
         backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Container(
@@ -109,15 +121,15 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.track_changes),
+              icon: Icon(Icons.api),
               label: "Trading",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.cable),
+              icon: Icon(Icons.donut_small),
               label: "Tokens",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.bug_report),
+              icon: Icon(Icons.new_releases),
               label: "Logs",
             ),
           ],

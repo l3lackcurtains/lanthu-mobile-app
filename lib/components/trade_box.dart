@@ -36,6 +36,7 @@ class TradeBox extends StatelessWidget {
     return Opacity(
       opacity: visible,
       child: Card(
+        color: Theme.of(context).canvasColor,
         shape: RoundedRectangleShapeBorder(
           borderRadius:
               const DynamicBorderRadius.all(DynamicRadius.circular(Length(16))),
@@ -56,42 +57,51 @@ class TradeBox extends StatelessWidget {
                 },
                 dense: false,
                 contentPadding: const EdgeInsets.fromLTRB(20, 0, 8, 0),
-                leading: trade.token != null && trade.token?.slug != null
-                    ? CachedNetworkImage(
-                        errorWidget: (context, url, error) => Container(
-                            width: 45,
-                            height: 45,
-                            decoration: const BoxDecoration(
-                                color: Colors.black, shape: BoxShape.circle),
+                leading: ClipOval(
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(8),
+                    child: trade.token != null && trade.token?.slug != null
+                        ? CachedNetworkImage(
+                            errorWidget: (context, url, error) => SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    trade.token.toString(),
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            imageUrl:
+                                'https://raw.githubusercontent.com/ErikThiart/cryptocurrency-icons/master/128/${trade.token?.slug!.toString().toLowerCase()}.png',
+                            width: 32,
+                          )
+                        : SizedBox(
+                            width: 32,
+                            height: 32,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
                                   trade.token.toString(),
-                                  style: const TextStyle(fontSize: 12),
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             )),
-                        imageUrl:
-                            'https://raw.githubusercontent.com/ErikThiart/cryptocurrency-icons/master/128/${trade.token?.slug!.toString().toLowerCase()}.png',
-                        width: 45,
-                      )
-                    : Container(
-                        width: 45,
-                        height: 45,
-                        decoration: const BoxDecoration(
-                            color: Colors.black, shape: BoxShape.circle),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              trade.token.toString(),
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        )),
+                  ),
+                ),
                 title: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Row(
