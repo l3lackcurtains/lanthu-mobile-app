@@ -27,7 +27,7 @@ class _AddTradeState extends State<AddTrade> {
   List<Token> tokens = [];
   Token _selectedToken = const Token(name: "BNB");
   int _typeIndex = 0;
-  final List<String> _status = ["INIT", "BOUGHT", "SOLD", "ERROR"];
+  final List<String> _status = ["BUYING", "SELLING", "COMPLETED", "ERROR"];
   String _widgetText = "Add Trade";
 
   @override

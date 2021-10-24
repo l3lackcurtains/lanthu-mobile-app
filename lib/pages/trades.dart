@@ -118,7 +118,7 @@ class _TradesState extends State<Trades> {
               );
             } else {
               return Container(
-                color: Colors.white,
+                color: Colors.black,
                 child: Center(
                   child: Text(
                     'Something went wrong, try again.',

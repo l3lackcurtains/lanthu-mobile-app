@@ -103,7 +103,7 @@ class _LogsState extends State<Logs> {
               );
             } else {
               return Container(
-                color: Colors.white,
+                color: Colors.black,
                 child: Center(
                   child: Text(
                     'Something went wrong, try again.',
