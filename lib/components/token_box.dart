@@ -3,16 +3,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lanthu_bot/models/token.dart';
-import 'package:lanthu_bot/models/token_info.dart';
 
 class TokenBox extends StatelessWidget {
-  const TokenBox(
-      {required this.token,
-      required this.onTapEdit,
-      required this.getTokenInfo});
+  const TokenBox({
+    required this.token,
+    required this.onTapEdit,
+  });
   final Token token;
   final Function onTapEdit;
-  final Future<TokenInfo> getTokenInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -72,39 +70,23 @@ class TokenBox extends StatelessWidget {
             Container(
               height: 8,
             ),
-            FutureBuilder(
-                future: getTokenInfo,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      height: 32,
-                      margin: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-                    );
-                  } else {
-                    if (snapshot.hasData) {
-                      final tokenInfo = snapshot.data as TokenInfo;
-                      return Container(
-                        margin: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-                        height: 32,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            tokenInfo.price != null
-                                ? Text(
-                                    "Price: ${double.parse(tokenInfo.price.toString()).toStringAsFixed(4)} USD")
-                                : const Text("N/A"),
-                            tokenInfo.balance != null
-                                ? Text(
-                                    "Balance: ${double.parse(tokenInfo.balance.toString()).toStringAsFixed(4)} ${tokenInfo.token}")
-                                : const Text(""),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return Container(height: 32);
-                  }
-                }),
+            Container(
+              margin: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+              height: 32,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  token.info?.price != null
+                      ? Text(
+                          "Price: ${double.parse(token.info?.price.toString() ?? "0")} USD")
+                      : const Text("N/A"),
+                  token.info?.balance != null
+                      ? Text(
+                          "Balance: ${double.parse(token.info?.balance.toString() ?? "0")} ${token.name}")
+                      : const Text(""),
+                ],
+              ),
+            ),
           ],
         ),
       ),

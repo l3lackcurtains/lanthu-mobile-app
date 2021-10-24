@@ -27,15 +27,30 @@ class _LogsState extends State<Logs> {
   Future<List<dynamic>> fetchFutureLogs() async {
     var client = http.Client();
     logs = [];
+    var query = """query {
+                  getLogs {
+                    error
+                    message
+                    result {
+                      _id
+                      message
+                      details
+                    }
+                  }
+                }
+              """;
     try {
-      var url = Uri.parse('$apiUrl/logs');
-
-      var response = await client.get(url);
-
+      var uri = Uri.parse('$apiUrl/?query=$query');
+      var response = await client.get(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        if (resData["message"] is! String) {
-          final List<dynamic> message = resData["message"];
+        if (resData["data"]["getLogs"]["result"] != null) {
+          final List<dynamic> message = resData["data"]["getLogs"]["result"];
           logs.addAll(message.map((m) => Log.fromMap(m)).toList());
         }
       }

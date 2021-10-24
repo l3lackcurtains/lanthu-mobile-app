@@ -27,9 +27,16 @@ class TokenInfo {
 
   TokenInfo.fromMap(Map<String, dynamic> map)
       : token = map['token'],
-        balance = double.parse(map['balance'].toString()),
-        price = double.parse(map['price'].toString()),
+        balance = map['balance'] != null
+            ? double.parse(map['balance'].toString())
+            : 0,
+        price =
+            map['price'] != null ? double.parse(map['price'].toString()) : 0,
         address = map['address'],
-        bnbBalance = double.parse(map['bnbBalance'].toString()),
-        busdBalance = double.parse(map['busdBalance'].toString());
+        bnbBalance = map['bnbBalance'] != null
+            ? double.parse(map['bnbBalance'].toString())
+            : 0,
+        busdBalance = map['busdBalance'] != null
+            ? double.parse(map['busdBalance'].toString())
+            : 0;
 }
