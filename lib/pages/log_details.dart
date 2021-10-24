@@ -51,10 +51,21 @@ class _LogDetailsState extends State<LogDetails> {
   }
 
   deleteLog() async {
-    var dio = Dio();
     var logId = widget.log!.id.toString();
+    var query = """mutation {
+          removeLog(
+            _id: "$logId",
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
+    var dio = Dio();
     try {
-      await dio.delete("$apiUrl/logs/$logId");
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
     } catch (e) {
       throw Exception('Failed to delete log');

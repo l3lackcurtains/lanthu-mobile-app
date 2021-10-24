@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:lanthu_bot/components/card_box.dart';
-import 'package:lanthu_bot/models/token.dart';
+import 'package:lanthu_bot/components/trade_box.dart';
 import 'package:lanthu_bot/models/trade.dart';
 import 'package:lanthu_bot/pages/add_trade.dart';
 import 'package:http/http.dart' as http;
@@ -28,16 +27,42 @@ class _TradesState extends State<Trades> {
   Future<List<dynamic>> fetchFutureTrades() async {
     var client = http.Client();
     trades = [];
-    try {
-      var url = Uri.parse('$apiUrl/trades');
 
-      var response = await client.get(url);
+    var query = """query {
+                  getTrades(token:1) {
+                    error
+                    message
+                    result {
+                      _id
+                      amount
+                      status
+                      buyLimit
+                      sellLimit
+                      stopLossLimit
+                      token {
+                        name
+                        address
+                        slug
+                      }
+                    }
+                  }
+                }
+              """;
+
+    try {
+      var uri = Uri.parse('$apiUrl/?query=$query');
+
+      var response = await client.get(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-        if (resData["message"] is! String) {
-          final List<dynamic> message = resData["message"];
-
+        if (resData["data"]["getTrades"]["result"] != null) {
+          final List<dynamic> message = resData["data"]["getTrades"]["result"];
           trades.addAll(message.map((m) => Trade.fromMap(m)).toList());
         }
       }
@@ -46,37 +71,6 @@ class _TradesState extends State<Trades> {
       throw 'No Internet connection';
     }
     return trades;
-  }
-
-  Future<Token> getFutureToken(Trade trade) async {
-    final newToken = await getToken(trade.token.toString());
-    if (newToken != null) {
-      Token token = Token.fromMap(newToken);
-      return token;
-    }
-    return const Token();
-  }
-
-  Future<dynamic> getToken(String name) async {
-    var client = http.Client();
-    try {
-      var url = Uri.parse('$apiUrl/tokens/$name');
-
-      var response = await client.get(url);
-
-      if (response.statusCode == 200) {
-        final resData = json.decode(response.body);
-        if (resData["message"] is! String) {
-          final dynamic message = resData["message"];
-          return message;
-        }
-        return null;
-      }
-    } on SocketException {
-      client.close();
-      throw 'No Internet connection';
-    }
-    return null;
   }
 
   @override
@@ -102,7 +96,7 @@ class _TradesState extends State<Trades> {
                   return Column(children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: CardBox(
+                      child: TradeBox(
                         trade: tradesList[index],
                         onTapEdit: () {
                           Navigator.push(
@@ -114,7 +108,6 @@ class _TradesState extends State<Trades> {
                                 _futureTrades = fetchFutureTrades();
                               }));
                         },
-                        getFutureToken: getFutureToken(tradesList[index]),
                       ),
                     ),
                     index == tradesList.length - 1

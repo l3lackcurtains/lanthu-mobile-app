@@ -20,12 +20,14 @@ class AddTrade extends StatefulWidget {
 
 class _AddTradeState extends State<AddTrade> {
   TextEditingController amountController = TextEditingController();
-  TextEditingController limitController = TextEditingController();
+  TextEditingController buyLimitController = TextEditingController();
+  TextEditingController sellLimitController = TextEditingController();
+  TextEditingController stopLossLimitController = TextEditingController();
 
   List<Token> tokens = [];
   Token _selectedToken = const Token(name: "BNB");
   int _typeIndex = 0;
-  final List<String> _types = ["BUY", "SELL"];
+  final List<String> _status = ["INIT", "BOUGHT", "SOLD", "ERROR"];
   String _widgetText = "Add Trade";
 
   @override
@@ -36,16 +38,34 @@ class _AddTradeState extends State<AddTrade> {
 
   Future<List<Token>> getTokens() async {
     var client = http.Client();
-    try {
-      var url = Uri.parse('$apiUrl/tokens');
+    var query = """query {
+                  getTokens{
+                    error
+                    message
+                    result {
+                      _id
+                      name
+                      address
+                      base
+                    }
+                  }
+                }
+              """;
 
-      var response = await client.get(url);
+    try {
+      var uri = Uri.parse('$apiUrl/?query=$query');
+
+      var response = await client.get(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-
-        if (resData["message"] is! String) {
-          final List<dynamic> message = resData["message"];
+        if (resData["data"]["getTokens"]["result"] != null) {
+          final List<dynamic> message = resData["data"]["getTokens"]["result"];
           tokens.addAll(message.map((m) => Token.fromMap(m)).toList());
         }
       }
@@ -56,20 +76,40 @@ class _AddTradeState extends State<AddTrade> {
     return tokens;
   }
 
-  Future<TokenInfo> getTokenInfo(String token) async {
+  Future<TokenInfo> getTokenInfo(String tokenId) async {
     var client = http.Client();
     TokenInfo tokenInfo = const TokenInfo();
 
-    try {
-      var url = Uri.parse('$apiUrl/tokeninfo/${token.toString()}');
+    var query = """query {
+                  getTokenInfo(tokenId: "$tokenId"){
+                    error
+                    message
+                    result {
+                      balance
+                      busdBalance
+                      bnbPrice
+                      price
+                      bnbBalance
+                      token
+                    }
+                  }
+                }
+              """;
 
-      var response = await client.get(url);
+    try {
+      var uri = Uri.parse('$apiUrl/?query=$query');
+      var response = await client.get(
+        uri,
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
 
       if (response.statusCode == 200) {
         final resData = json.decode(response.body);
-
-        if (resData["message"] is! String) {
-          final Map<String, dynamic> message = resData["message"];
+        if (resData["data"]["getTokenInfo"]["result"] != null) {
+          final Map<String, dynamic> message =
+              resData["data"]["getTokenInfo"]["result"];
           tokenInfo = TokenInfo.fromMap(message);
         }
       }
@@ -91,15 +131,19 @@ class _AddTradeState extends State<AddTrade> {
     if (widget.trade != null) {
       Trade trade = widget.trade as Trade;
       amountController.text = trade.amount.toString();
-      limitController.text = trade.limit.toString();
-      final index = tokens.indexWhere(
-          (element) => element.name == trade.token.toString().toUpperCase());
+      buyLimitController.text = trade.buyLimit.toString();
+      sellLimitController.text = trade.sellLimit.toString();
+      stopLossLimitController.text = trade.stopLossLimit.toString();
+
+      final index = tokens.indexWhere((element) =>
+          element.name == trade.token?.name.toString().toUpperCase());
       setState(() {
         if (index >= 0 && index < tokens.length) {
           _selectedToken = tokens[index];
         }
-        if (trade.type == _types[0]) _typeIndex = 0;
-        if (trade.type == _types[1]) _typeIndex = 1;
+        for (var stat = 0; stat < _status.length; stat++) {
+          if (trade.status == _status[stat]) _typeIndex = stat;
+        }
       });
       _widgetText = 'Update Trade';
     }
@@ -109,7 +153,9 @@ class _AddTradeState extends State<AddTrade> {
   void dispose() {
     super.dispose();
     amountController.dispose();
-    limitController.dispose();
+    buyLimitController.dispose();
+    sellLimitController.dispose();
+    stopLossLimitController.dispose();
   }
 
   @override
@@ -184,35 +230,57 @@ class _AddTradeState extends State<AddTrade> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ActionChip(
                           backgroundColor: _typeIndex == 0
-                              ? Colors.green.shade500
+                              ? const Color(0xFF5f27cd)
                               : Colors.grey.shade700,
                           label: Container(
-                              padding:
-                                  const EdgeInsets.fromLTRB(32, 16, 32, 16),
-                              child: const Text('BUY')),
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                              child: const Text('INIT')),
                           onPressed: () {
                             setState(() {
                               _typeIndex = 0;
                             });
                           }),
-                      Container(
-                        width: 32,
-                      ),
                       ActionChip(
                           backgroundColor: _typeIndex == 1
-                              ? Colors.green.shade500
+                              ? const Color(0xFF5f27cd)
                               : Colors.grey.shade700,
                           label: Container(
-                            padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
-                            child: const Text('SELL'),
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            child: const Text('BOUGHT'),
                           ),
                           onPressed: () {
                             setState(() {
                               _typeIndex = 1;
+                            });
+                          }),
+                      ActionChip(
+                          backgroundColor: _typeIndex == 2
+                              ? const Color(0xFF44bd32)
+                              : Colors.grey.shade700,
+                          label: Container(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            child: const Text('SOLD'),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _typeIndex = 2;
+                            });
+                          }),
+                      ActionChip(
+                          backgroundColor: _typeIndex == 3
+                              ? Colors.red.shade500
+                              : Colors.grey.shade700,
+                          label: Container(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            child: const Text('ERROR'),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _typeIndex = 3;
                             });
                           }),
                     ],
@@ -234,8 +302,7 @@ class _AddTradeState extends State<AddTrade> {
                     items: tokens.map((tkn) {
                       return DropdownMenuItem<Token>(
                         value: tkn,
-                        child: Text(
-                            "${tkn.name!.toUpperCase()} (${tkn.swapWith})"),
+                        child: Text("${tkn.name!.toUpperCase()} (${tkn.base})"),
                       );
                     }).toList(),
                   ),
@@ -254,13 +321,30 @@ class _AddTradeState extends State<AddTrade> {
                   padding: const EdgeInsets.all(16.0),
                   child: TextField(
                     keyboardType: TextInputType.number,
-                    controller: limitController,
-                    decoration: const InputDecoration(labelText: 'Limit'),
+                    controller: buyLimitController,
+                    decoration: const InputDecoration(labelText: 'Buy Limit'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: sellLimitController,
+                    decoration: const InputDecoration(labelText: 'Sell Limit'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: stopLossLimitController,
+                    decoration:
+                        const InputDecoration(labelText: 'Stop Loss Limit'),
                   ),
                 ),
                 Container(height: 16),
                 FutureBuilder(
-                    future: getTokenInfo(_selectedToken.name.toString()),
+                    future: getTokenInfo(_selectedToken.id.toString()),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Container(height: 150);
@@ -339,17 +423,33 @@ class _AddTradeState extends State<AddTrade> {
   }
 
   insertTrade() async {
-    var dio = Dio();
+    var amount = double.parse(amountController.text);
+    var buyLimit = double.parse(buyLimitController.text);
+    var sellLimit = double.parse(sellLimitController.text);
+    var stopLossLimit = double.parse(stopLossLimitController.text);
+    var status = _status[_typeIndex];
+    var tokenId = _selectedToken.id;
 
+    var query = """mutation {
+          addTrade(
+            amount: $amount,
+            buyLimit: $buyLimit,
+            sellLimit: $sellLimit,
+            stopLossLimit: $stopLossLimit,
+            status: "$status",
+            tokenId: "$tokenId"
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
+
+    var dio = Dio();
     try {
-      await dio.post("$apiUrl/trades", data: {
-        "token": _selectedToken.name,
-        "amount": double.parse(amountController.text),
-        "limit": double.parse(limitController.text),
-        "type": _types[_typeIndex],
-        "success": false,
-        "error": false
-      });
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -358,17 +458,34 @@ class _AddTradeState extends State<AddTrade> {
   }
 
   updateTrade() async {
-    var dio = Dio();
     var tradeId = widget.trade!.id;
+    var amount = double.parse(amountController.text);
+    var buyLimit = double.parse(buyLimitController.text);
+    var sellLimit = double.parse(sellLimitController.text);
+    var stopLossLimit = double.parse(stopLossLimitController.text);
+    var status = _status[_typeIndex];
+    var tokenId = _selectedToken.id;
+
+    var query = """mutation {
+          updateTrade(
+            _id: "$tradeId",
+            amount: $amount,
+            buyLimit: $buyLimit,
+            sellLimit: $sellLimit,
+            stopLossLimit: $stopLossLimit,
+            status: "$status",
+            tokenId: "$tokenId"
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
+    var dio = Dio();
     try {
-      await dio.put("$apiUrl/trades/$tradeId", data: {
-        "token": _selectedToken.name,
-        "amount": double.parse(amountController.text),
-        "limit": double.parse(limitController.text),
-        "type": _types[_typeIndex],
-        "success": false,
-        "error": false
-      });
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -377,10 +494,21 @@ class _AddTradeState extends State<AddTrade> {
   }
 
   deleteTrade() async {
-    var dio = Dio();
     var tradeId = widget.trade!.id;
+    var query = """mutation {
+          removeTrade(
+            _id: "$tradeId",
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
+    var dio = Dio();
     try {
-      await dio.delete("$apiUrl/trades/$tradeId");
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {

@@ -23,7 +23,7 @@ class _AddTokenState extends State<AddToken> {
   TextEditingController slugController = TextEditingController();
   TextEditingController decimalController = TextEditingController();
 
-  String _selectSwapWith = "BNB";
+  String _selectbase = "BNB";
 
   String _widgetText = "Add Token";
 
@@ -38,10 +38,13 @@ class _AddTokenState extends State<AddToken> {
       Token token = widget.token as Token;
       nameController.text = token.name.toString();
       addressController.text = token.address.toString();
-      _selectSwapWith = token.swapWith.toString();
+
       slugController.text = token.slug.toString();
       decimalController.text = token.decimal.toString();
-      _widgetText = 'Update Trade';
+      setState(() {
+        _selectbase = token.base.toString();
+        _widgetText = 'Update Trade';
+      });
     }
   }
 
@@ -153,13 +156,13 @@ class _AddTokenState extends State<AddToken> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: DropdownButton<String>(
-                    value: _selectSwapWith,
+                    value: _selectbase,
                     icon: const Icon(Icons.arrow_downward),
                     itemHeight: 60,
                     isExpanded: true,
                     onChanged: (String? newValue) {
                       setState(() {
-                        _selectSwapWith = newValue!;
+                        _selectbase = newValue!;
                       });
                     },
                     items: <String>[
@@ -201,16 +204,30 @@ class _AddTokenState extends State<AddToken> {
   }
 
   insertToken() async {
-    var dio = Dio();
+    var name = nameController.text;
+    var slug = slugController.text;
+    var address = addressController.text;
+    var decimal = int.parse(decimalController.text.toString());
+    var base = _selectbase;
 
+    var query = """mutation {
+          addToken(
+            name: "$name",
+            slug: "$slug",
+            address: "$address",
+            decimal: $decimal,
+            base: "$base",
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
+    var dio = Dio();
     try {
-      await dio.post("$apiUrl/tokens", data: {
-        "name": nameController.text.toString(),
-        "slug": slugController.text.toString(),
-        "address": addressController.text.toString(),
-        "swapWith": _selectSwapWith,
-        "decimal": int.parse(decimalController.text.toString()),
-      });
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -219,16 +236,32 @@ class _AddTokenState extends State<AddToken> {
   }
 
   updateToken() async {
+    var tokenId = widget.token!.id;
+    var name = nameController.text;
+    var slug = slugController.text;
+    var address = addressController.text;
+    var decimal = int.parse(decimalController.text.toString());
+    var base = _selectbase;
+
+    var query = """mutation {
+          updateToken(
+            _id: "$tokenId",
+            name: "$name",
+            slug: "$slug",
+            address: "$address",
+            decimal: $decimal,
+            base: "$base",
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
     var dio = Dio();
-    var tokenName = widget.token!.name;
     try {
-      await dio.put("$apiUrl/tokens/$tokenName", data: {
-        "name": nameController.text,
-        "slug": slugController.text.toString(),
-        "address": addressController.text.toString(),
-        "swapWith": _selectSwapWith,
-        "decimal": int.parse(decimalController.text.toString()),
-      });
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
@@ -237,10 +270,21 @@ class _AddTokenState extends State<AddToken> {
   }
 
   deleteToken() async {
+    var tokenId = widget.token!.id;
+    var query = """mutation {
+          removeToken(
+            _id: "$tokenId",
+          ) {
+            message
+            error
+            result {
+              _id
+            }
+          }
+        }""";
     var dio = Dio();
-    var tokenName = widget.token!.name;
     try {
-      await dio.delete("$apiUrl/tokens/$tokenName");
+      await dio.post("$apiUrl/graphql", data: {"query": query});
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
