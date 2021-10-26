@@ -55,10 +55,13 @@ class TradeBox extends StatelessWidget {
                 onTap: () {
                   onTapEdit();
                 },
-                dense: false,
+                dense: true,
                 contentPadding: const EdgeInsets.fromLTRB(20, 0, 8, 0),
-                leading: ClipOval(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
                   child: Container(
+                    width: 48,
+                    height: 48,
                     color: Colors.white,
                     padding: const EdgeInsets.all(8),
                     child: trade.token != null && trade.token?.slug != null
@@ -83,6 +86,7 @@ class TradeBox extends StatelessWidget {
                             imageUrl:
                                 'https://raw.githubusercontent.com/ErikThiart/cryptocurrency-icons/master/128/${trade.token?.slug!.toString().toLowerCase()}.png',
                             width: 32,
+                            height: 32,
                           )
                         : SizedBox(
                             width: 32,

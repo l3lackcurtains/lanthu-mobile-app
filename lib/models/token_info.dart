@@ -5,6 +5,7 @@ class TokenInfo {
   final double? bnbBalance;
   final double? busdBalance;
   final double? price;
+  final double? bnbPrice;
 
   const TokenInfo(
       {this.token,
@@ -12,6 +13,7 @@ class TokenInfo {
       this.address,
       this.bnbBalance,
       this.busdBalance,
+      this.bnbPrice,
       this.price});
 
   Map<String, dynamic> toMap() {
@@ -21,6 +23,7 @@ class TokenInfo {
       'address': address,
       'bnbBalance': bnbBalance,
       'busdBalance': busdBalance,
+      'bnbPrice': bnbPrice,
       'price': price
     };
   }
@@ -32,6 +35,9 @@ class TokenInfo {
             : 0,
         price =
             map['price'] != null ? double.parse(map['price'].toString()) : 0,
+        bnbPrice = map['bnbPrice'] != null
+            ? double.parse(map['bnbPrice'].toString())
+            : 0,
         address = map['address'],
         bnbBalance = map['bnbBalance'] != null
             ? double.parse(map['bnbBalance'].toString())

@@ -9,7 +9,6 @@ import 'package:lanthu_bot/models/token_info.dart';
 import 'package:lanthu_bot/models/trade.dart';
 import 'package:http/http.dart' as http;
 import 'package:lanthu_bot/utils/constants.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 
 class AddTrade extends StatefulWidget {
   const AddTrade({Key? key, this.trade}) : super(key: key);
@@ -20,16 +19,23 @@ class AddTrade extends StatefulWidget {
 }
 
 class _AddTradeState extends State<AddTrade> {
-  TextEditingController amountController = TextEditingController();
-  TextEditingController buyLimitController = TextEditingController();
-  TextEditingController sellLimitController = TextEditingController();
-  TextEditingController stopLossLimitController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   List<Token> tokens = [];
   Token _selectedToken = const Token(name: "BNB");
   int _typeIndex = 0;
   final List<String> _status = ["BUYING", "SELLING", "COMPLETED", "ERROR"];
   String _widgetText = "Add Trade";
+
+  String _amount = "0.0";
+  String _buyLimit = "0.0";
+  String _sellLimit = "0.0";
+  String _stopLossLimit = "0.0";
+
+  Key _amountKey = GlobalKey();
+  Key _buyLimitKey = GlobalKey();
+  Key _sellLimitKey = GlobalKey();
+  Key _stopLossLimitKey = GlobalKey();
 
   @override
   void initState() {
@@ -131,10 +137,19 @@ class _AddTradeState extends State<AddTrade> {
 
     if (widget.trade != null) {
       Trade trade = widget.trade as Trade;
-      amountController.text = trade.amount.toString();
-      buyLimitController.text = trade.buyLimit.toString();
-      sellLimitController.text = trade.sellLimit.toString();
-      stopLossLimitController.text = trade.stopLossLimit.toString();
+
+      setState(() {
+        _widgetText = 'Update Trade';
+        _amount = trade.amount.toString();
+        _buyLimit = trade.buyLimit.toString();
+        _sellLimit = trade.sellLimit.toString();
+        _stopLossLimit = trade.stopLossLimit.toString();
+
+        _amountKey = Key(_amount);
+        _buyLimitKey = Key(_buyLimit);
+        _sellLimitKey = Key(_sellLimit);
+        _stopLossLimitKey = Key(_stopLossLimit);
+      });
 
       final index = tokens.indexWhere((element) =>
           element.name == trade.token?.name.toString().toUpperCase());
@@ -146,17 +161,12 @@ class _AddTradeState extends State<AddTrade> {
           if (trade.status == _status[stat]) _typeIndex = stat;
         }
       });
-      _widgetText = 'Update Trade';
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    amountController.dispose();
-    buyLimitController.dispose();
-    sellLimitController.dispose();
-    stopLossLimitController.dispose();
   }
 
   @override
@@ -209,7 +219,45 @@ class _AddTradeState extends State<AddTrade> {
       ],
     );
 
+    String totalBuy = "0.00000000";
+    String totalSell = "0.00000000";
+    String totalProfit = "0.00000000";
+    String totalStopLoss = "0.00000000";
+
+    if (double.tryParse(_amount) != null &&
+        double.tryParse(_buyLimit) != null &&
+        double.parse(_buyLimit) > 0) {
+      totalBuy =
+          (double.parse(_amount) * double.parse(_buyLimit)).toStringAsFixed(8);
+    }
+    if (double.tryParse(_amount) != null &&
+        double.tryParse(_sellLimit) != null &&
+        double.parse(_sellLimit) > 0) {
+      totalSell =
+          (double.parse(_amount) * double.parse(_sellLimit)).toStringAsFixed(8);
+    }
+
+    if (double.tryParse(_amount) != null &&
+        double.tryParse(_buyLimit) != null &&
+        double.tryParse(_sellLimit) != null &&
+        double.parse(_buyLimit) > 0 &&
+        double.parse(_sellLimit) > 0) {
+      totalProfit =
+          (double.parse(totalSell) - double.parse(totalBuy)).toStringAsFixed(8);
+    }
+
+    if (double.tryParse(_amount) != null &&
+        double.tryParse(_buyLimit) != null &&
+        double.tryParse(_stopLossLimit) != null &&
+        double.parse(_buyLimit) > 0 &&
+        double.parse(_stopLossLimit) > 0) {
+      totalStopLoss = (double.parse(totalBuy) -
+              double.parse(_amount) * double.parse(_stopLossLimit))
+          .toStringAsFixed(8);
+    }
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(_widgetText),
         actions: <Widget>[
@@ -225,185 +273,327 @@ class _AddTradeState extends State<AddTrade> {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
+          Container(
+            color: Theme.of(context).canvasColor,
+            height: 100,
+            alignment: Alignment.topLeft,
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ActionChip(
-                          backgroundColor: _typeIndex == 0
-                              ? const Color(0xFF5f27cd)
-                              : Colors.grey.shade700,
-                          label: Container(
-                              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                              child: const Text('BUYING')),
-                          onPressed: () {
-                            setState(() {
-                              _typeIndex = 0;
-                            });
-                          }),
-                      ActionChip(
-                          backgroundColor: _typeIndex == 1
-                              ? const Color(0xFF5f27cd)
-                              : Colors.grey.shade700,
-                          label: Container(
-                            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            child: const Text('SELLING'),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _typeIndex = 1;
-                            });
-                          }),
-                      ActionChip(
-                          backgroundColor: _typeIndex == 2
-                              ? const Color(0xFF44bd32)
-                              : Colors.grey.shade700,
-                          label: Container(
-                            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            child: const Text('COMPLETED'),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _typeIndex = 2;
-                            });
-                          }),
-                      ActionChip(
-                          backgroundColor: _typeIndex == 3
-                              ? Colors.red.shade500
-                              : Colors.grey.shade700,
-                          label: Container(
-                            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            child: const Text('ERROR'),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _typeIndex = 3;
-                            });
-                          }),
-                    ],
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("BUY"),
+                    Text("\$" + totalBuy),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: DropdownButton<Token>(
-                    value: _selectedToken,
-                    icon: const Icon(Icons.arrow_downward),
-                    iconSize: 18,
-                    itemHeight: 60,
-                    isExpanded: true,
-                    onChanged: (Token? newValue) {
-                      setState(() {
-                        _selectedToken = newValue!;
-                      });
-                    },
-                    items: tokens.map((tkn) {
-                      return DropdownMenuItem<Token>(
-                        value: tkn,
-                        child: Text("${tkn.name!.toUpperCase()} (${tkn.base})"),
-                      );
-                    }).toList(),
-                  ),
+                const SizedBox(
+                  height: 4,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    controller: amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                    ),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("SELL"),
+                    Text("\$" + totalSell),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    controller: buyLimitController,
-                    decoration: const InputDecoration(labelText: 'Buy Limit'),
-                  ),
+                const SizedBox(
+                  height: 4,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    controller: sellLimitController,
-                    decoration: const InputDecoration(labelText: 'Sell Limit'),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("PROFIT"),
+                    Text("\$" + totalProfit),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    controller: stopLossLimitController,
-                    decoration:
-                        const InputDecoration(labelText: 'Stop Loss Limit'),
-                  ),
+                const SizedBox(
+                  height: 4,
                 ),
-                Container(height: 16),
-                FutureBuilder(
-                    future: getTokenInfo(_selectedToken.id.toString()),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Container(height: 150);
-                      } else {
-                        if (snapshot.hasData) {
-                          final tokenInfo = snapshot.data as TokenInfo;
-                          return Material(
-                            child: Container(
-                              height: 180,
-                              padding: const EdgeInsets.all(16.0),
-                              child: ListTile(
-                                title: Text(
-                                    "${tokenInfo.token} (${tokenInfo.price.toString()})"),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      height: 8,
-                                    ),
-                                    Text(
-                                        "${tokenInfo.balance} ${tokenInfo.token}"),
-                                    Container(
-                                      height: 8,
-                                    ),
-                                    Text("${tokenInfo.bnbBalance} BNB"),
-                                    Container(
-                                      height: 8,
-                                    ),
-                                    Text("${tokenInfo.busdBalance} BUSD"),
-                                    Container(
-                                      height: 8,
-                                    ),
-                                    TextButton(
-                                      child: const Text('INSERT MAX'),
-                                      onPressed: () {
-                                        amountController.text =
-                                            tokenInfo.balance.toString();
-                                      },
-                                    ),
-                                    Container(
-                                      height: 8,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-
-                        return Container(
-                          color: Colors.black,
-                          child: const LinearProgressIndicator(
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("STOP LOSS"),
+                    Text("\$" + totalStopLoss),
+                  ],
+                ),
               ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.fromLTRB(0, 100, 0, 0),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ActionChip(
+                              backgroundColor: _typeIndex == 0
+                                  ? const Color(0xFF5f27cd)
+                                  : Colors.grey.shade700,
+                              label: Container(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  child: const Text('BUYING')),
+                              onPressed: () {
+                                setState(() {
+                                  _typeIndex = 0;
+                                });
+                              }),
+                          ActionChip(
+                              backgroundColor: _typeIndex == 1
+                                  ? const Color(0xFF5f27cd)
+                                  : Colors.grey.shade700,
+                              label: Container(
+                                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                child: const Text('SELLING'),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _typeIndex = 1;
+                                });
+                              }),
+                          ActionChip(
+                              backgroundColor: _typeIndex == 2
+                                  ? const Color(0xFF44bd32)
+                                  : Colors.grey.shade700,
+                              label: Container(
+                                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                child: const Text('COMPLETED'),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _typeIndex = 2;
+                                });
+                              }),
+                          ActionChip(
+                              backgroundColor: _typeIndex == 3
+                                  ? Colors.red.shade500
+                                  : Colors.grey.shade700,
+                              label: Container(
+                                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                child: const Text('ERROR'),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _typeIndex = 3;
+                                });
+                              }),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 4),
+                      child: DropdownButton<Token>(
+                        value: _selectedToken,
+                        icon: const Icon(Icons.arrow_downward),
+                        iconSize: 18,
+                        itemHeight: 60,
+                        isExpanded: true,
+                        onChanged: (Token? newValue) {
+                          setState(() {
+                            _selectedToken = newValue!;
+                          });
+                        },
+                        items: tokens.map((tkn) {
+                          return DropdownMenuItem<Token>(
+                            value: tkn,
+                            child: Text(
+                                "${tkn.name!.toUpperCase()} (${tkn.base})"),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 4),
+                      child: Focus(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Amount',
+                          ),
+                          key: _amountKey,
+                          initialValue: _amount,
+                          onChanged: (String val) {
+                            if (mounted) {
+                              setState(() {
+                                _amount = val;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Empty amount";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 4),
+                      child: Focus(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration:
+                              const InputDecoration(labelText: 'Buy Limit'),
+                          key: _buyLimitKey,
+                          initialValue: _buyLimit,
+                          onChanged: (String val) {
+                            if (mounted) {
+                              setState(() {
+                                _buyLimit = val;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Empty buy limit";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 4),
+                      child: Focus(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration:
+                              const InputDecoration(labelText: 'Sell Limit'),
+                          key: _sellLimitKey,
+                          initialValue: _sellLimit,
+                          onChanged: (String val) {
+                            if (mounted) {
+                              setState(() {
+                                _sellLimit = val;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Empty sell limit";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 4),
+                      child: Focus(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                              labelText: 'Stop Loss Limit'),
+                          key: _stopLossLimitKey,
+                          initialValue: _stopLossLimit,
+                          onChanged: (String val) {
+                            if (mounted) {
+                              setState(() {
+                                _stopLossLimit = val;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Empty stop loss limit";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Container(height: 16),
+                    FutureBuilder(
+                        future: getTokenInfo(_selectedToken.id.toString()),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Container(height: 160);
+                          } else {
+                            if (snapshot.hasData) {
+                              final tokenInfo = snapshot.data as TokenInfo;
+                              final balanceUsd = double.parse((double.parse(
+                                              tokenInfo.balance.toString()) *
+                                          double.parse(
+                                              tokenInfo.price.toString()))
+                                      .toString())
+                                  .toStringAsFixed(8);
+
+                              final bnbUsd = double.parse((double.parse(
+                                              tokenInfo.bnbBalance.toString()) *
+                                          double.parse(
+                                              tokenInfo.bnbPrice.toString()))
+                                      .toString())
+                                  .toStringAsFixed(8);
+
+                              return Material(
+                                child: Container(
+                                  height: 160,
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ListTile(
+                                    title: Text(
+                                        "${tokenInfo.token} (\$${tokenInfo.price.toString()})"),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                            "${double.parse(tokenInfo.balance.toString()).toStringAsFixed(8)} ${tokenInfo.token} (\$$balanceUsd)"),
+                                        Container(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                            "${double.parse(tokenInfo.bnbBalance.toString()).toStringAsFixed(8)} BNB (\$$bnbUsd)"),
+                                        Container(
+                                          height: 8,
+                                        ),
+                                        Text(
+                                            "${double.parse(tokenInfo.busdBalance.toString()).toStringAsFixed(8)} BUSD"),
+                                        Container(
+                                          height: 8,
+                                        ),
+                                        TextButton(
+                                          child: const Text('INSERT MAX'),
+                                          onPressed: () {
+                                            setState(() {
+                                              _amount =
+                                                  tokenInfo.balance.toString();
+                                              _amountKey = Key(
+                                                  tokenInfo.balance.toString());
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return Container(
+                              color: Colors.black,
+                              child: const LinearProgressIndicator(
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -424,14 +614,16 @@ class _AddTradeState extends State<AddTrade> {
   }
 
   insertTrade() async {
-    var amount = double.parse(amountController.text);
-    var buyLimit = double.parse(buyLimitController.text);
-    var sellLimit = double.parse(sellLimitController.text);
-    var stopLossLimit = double.parse(stopLossLimitController.text);
-    var status = _status[_typeIndex];
-    var tokenId = _selectedToken.id;
+    final formState = _formKey.currentState;
+    if (formState!.validate()) {
+      var amount = double.parse(_amount.toString());
+      var buyLimit = double.parse(_buyLimit.toString());
+      var sellLimit = double.parse(_sellLimit.toString());
+      var stopLossLimit = double.parse(_stopLossLimit.toString());
+      var status = _status[_typeIndex];
+      var tokenId = _selectedToken.id;
 
-    var query = """mutation {
+      var query = """mutation {
           addTrade(
             amount: $amount,
             buyLimit: $buyLimit,
@@ -448,28 +640,31 @@ class _AddTradeState extends State<AddTrade> {
           }
         }""";
 
-    var dio = Dio();
-    try {
-      await dio.post("$graphUrl/graphql", data: {"query": query});
-      Future.delayed(const Duration(milliseconds: 2000), () {
-        Navigator.pop(context);
-        Navigator.pop(context);
-      });
-    } catch (e) {
-      throw Exception('Failed to add trade');
+      var dio = Dio();
+      try {
+        await dio.post("$graphUrl/graphql", data: {"query": query});
+        Future.delayed(const Duration(milliseconds: 2000), () {
+          Navigator.pop(context);
+          Navigator.pop(context);
+        });
+      } catch (e) {
+        throw Exception('Failed to add trade');
+      }
     }
   }
 
   updateTrade() async {
-    var tradeId = widget.trade!.id;
-    var amount = double.parse(amountController.text);
-    var buyLimit = double.parse(buyLimitController.text);
-    var sellLimit = double.parse(sellLimitController.text);
-    var stopLossLimit = double.parse(stopLossLimitController.text);
-    var status = _status[_typeIndex];
-    var tokenId = _selectedToken.id;
+    final formState = _formKey.currentState;
+    if (formState!.validate()) {
+      var tradeId = widget.trade!.id;
+      var amount = double.parse(_amount.toString());
+      var buyLimit = double.parse(_buyLimit.toString());
+      var sellLimit = double.parse(_sellLimit.toString());
+      var stopLossLimit = double.parse(_stopLossLimit.toString());
+      var status = _status[_typeIndex];
+      var tokenId = _selectedToken.id;
 
-    var query = """mutation {
+      var query = """mutation {
           updateTrade(
             _id: "$tradeId",
             amount: $amount,
@@ -486,18 +681,17 @@ class _AddTradeState extends State<AddTrade> {
             }
           }
         }""";
-    var dio = Dio();
-    try {
-      await dio.post("$graphUrl/graphql", data: {"query": query});
-      Future.delayed(const Duration(milliseconds: 2000), () {
-        Navigator.pop(context);
-        Navigator.pop(context);
-      });
-    } catch (e) {
-      throw Exception('Failed to update trade');
+      var dio = Dio();
+      try {
+        await dio.post("$graphUrl/graphql", data: {"query": query});
+        Future.delayed(const Duration(milliseconds: 2000), () {
+          Navigator.pop(context);
+          Navigator.pop(context);
+        });
+      } catch (e) {
+        throw Exception('Failed to update trade');
+      }
     }
-
-    context.loaderOverlay.hide();
   }
 
   deleteTrade() async {

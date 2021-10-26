@@ -26,8 +26,11 @@ class TokenBox extends StatelessWidget {
         },
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(20, 0, 8, 16),
-        leading: ClipOval(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(32),
           child: Container(
+            width: 48,
+            height: 48,
             color: Colors.white,
             padding: const EdgeInsets.all(8),
             child: token.slug != null
@@ -81,7 +84,7 @@ class TokenBox extends StatelessWidget {
                       fontSize: 18, fontWeight: FontWeight.w600)),
               token.info?.price != null
                   ? Text(
-                      "${double.parse(token.info?.price.toString() ?? "0").toStringAsFixed(8)} \$")
+                      "\$${double.parse(token.info?.price.toString() ?? "0").toStringAsFixed(8)}")
                   : const Text("N/A"),
             ],
           ),
